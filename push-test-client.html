@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUBE - WebSocket Push Notification Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --glass-bg: rgba(30, 41, 59, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --card-radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--card-radius);
+      padding: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: all 0.3s ease;
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(99, 102, 241, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.08);
+    }
+
+    h1, h2 {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #a5b4fc, #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h1 {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-sub);
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      color: var(--text-sub);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.8rem;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    button {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-sub);
+    }
+
+    .indicator.connected {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .indicator.disconnected {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    .notifications-list {
+      max-height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding-right: 0.5rem;
+    }
+
+    .notifications-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .notifications-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .notifications-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .notification-item {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 1rem;
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: #a5b4fc;
+      font-size: 1rem;
+    }
+
+    .notification-time {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+    }
+
+    .notification-body {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .no-notifications {
+      text-align: center;
+      color: var(--text-sub);
+      padding: 2rem 0;
+      font-style: italic;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CUBE</h1>
+  <div class="subtitle">Push Notification Service Demo (Socket.io WebSocket + RabbitMQ + API Gateway)</div>
+
+  <div class="container">
+    <!-- Left Panel: Client Config & Test Trigger -->
+    <div class="glass-panel">
+      <h2>1. WebSocket Client</h2>
+      
+      <div class="connection-status">
+        <div id="connectionIndicator" class="indicator disconnected"></div>
+        <span id="connectionText">Disconnected</span>
+      </div>
+
+      <div class="form-group">
+        <label for="clientIdInput">Client (User) ID to Listen As</label>
+        <input type="text" id="clientIdInput" value="user_12345">
+      </div>
+      <button id="connectBtn" style="margin-bottom: 2rem;">Connect / Reconnect</button>
+
+      <h2>2. Trigger Test Push</h2>
+      <div class="form-group">
+        <label for="targetUserId">Target User ID (To send to)</label>
+        <input type="text" id="targetUserId" value="user_12345">
+      </div>
+      <div class="form-group">
+        <label for="pushTitle">Notification Title</label>
+        <input type="text" id="pushTitle" value="System Update">
+      </div>
+      <div class="form-group">
+        <label for="pushMessage">Notification Message</label>
+        <textarea id="pushMessage" rows="3">A new feature has been successfully implemented on the server.</textarea>
+      </div>
+      <button id="triggerBtn" style="background: var(--success);">Send Push Notification</button>
+    </div>
+
+    <!-- Right Panel: Notification Console -->
+    <div class="glass-panel">
+      <h2>Notification Console</h2>
+      <div class="notifications-list" id="notificationsList">
+        <div class="no-notifications" id="noNotifications">No push notifications received yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let socket = null;
+    const connectionIndicator = document.getElementById('connectionIndicator');
+    const connectionText = document.getElementById('connectionText');
+    const clientIdInput = document.getElementById('clientIdInput');
+    const connectBtn = document.getElementById('connectBtn');
+    
+    const targetUserId = document.getElementById('targetUserId');
+    const pushTitle = document.getElementById('pushTitle');
+    const pushMessage = document.getElementById('pushMessage');
+    const triggerBtn = document.getElementById('triggerBtn');
+    
+    const notificationsList = document.getElementById('notificationsList');
+    const noNotifications = document.getElementById('noNotifications');
+
+    // Connect to WebSocket Server
+    function connect() {
+      if (socket) {
+        socket.disconnect();
+      }
+
+      const userId = clientIdInput.value.trim();
+      if (!userId) {
+        alert('Please enter a Client ID to connect.');
+        return;
+      }
+
+      // Connect to Socket.io gateway namespace /push
+      socket = io('http://localhost:3003/push', {
+        query: { userId },
+        transports: ['websocket', 'polling']
+      });
+
+      socket.on('connect', () => {
+        connectionIndicator.className = 'indicator connected';
+        connectionText.innerText = `Connected as: ${userId}`;
+        connectBtn.innerText = 'Disconnect';
+        connectBtn.style.background = '#ef4444';
+      });
+
+      socket.on('disconnect', () => {
+        connectionIndicator.className = 'indicator disconnected';
+        connectionText.innerText = 'Disconnected';
+        connectBtn.innerText = 'Connect / Reconnect';
+        connectBtn.style.background = 'var(--accent)';
+      });
+
+      socket.on('notification', (data) => {
+        addNotification(data);
+      });
+    }
+
+    function addNotification(data) {
+      if (noNotifications) {
+        noNotifications.remove();
+      }
+
+      const item = document.createElement('div');
+      item.className = 'notification-item';
+      
+      const timeStr = new Date(data.timestamp).toLocaleTimeString();
+
+      item.innerHTML = `
+        <div class="notification-header">
+          <span class="notification-title">${escapeHtml(data.title)}</span>
+          <span class="notification-time">${timeStr}</span>
+        </div>
+        <div class="notification-body">${escapeHtml(data.message)}</div>
+      `;
+
+      notificationsList.insertBefore(item, notificationsList.firstChild);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    connectBtn.addEventListener('click', () => {
+      if (socket && socket.connected) {
+        socket.disconnect();
+      } else {
+        connect();
+      }
+    });
+
+    // Send HTTP trigger to API Gateway
+    triggerBtn.addEventListener('click', async () => {
+      const payload = {
+        userId: targetUserId.value.trim(),
+        title: pushTitle.value.trim(),
+        message: pushMessage.value.trim()
+      };
+
+      if (!payload.userId || !payload.title || !payload.message) {
+        alert('Please fill out all fields to trigger a notification.');
+        return;
+      }
+
+      try {
+        triggerBtn.disabled = true;
+        triggerBtn.innerText = 'Sending...';
+
+        const response = await fetch('http://localhost:3000/v1/auth/test-push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          console.log('Successfully triggered push event:', data);
+        } else {
+          alert('Error: ' + (data.message || 'Failed to trigger.'));
+        }
+      } catch (err) {
+        alert('Network Error. Make sure API Gateway is running on port 3000.');
+        console.error(err);
+      } finally {
+        triggerBtn.disabled = false;
+        triggerBtn.innerText = 'Send Push Notification';
+      }
+    });
+
+    // Auto-connect on page load
+    connect();
+  </script>
+</body>
+</html>

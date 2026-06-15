@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #e6e6f0;
+            margin: 0;
+            padding: 20px 12px;
+        }
+        .wrapper {
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #1c1c28;
+            border: 1px solid rgba(106, 79, 255, 0.2);
+            border-radius: 16px;
+            padding: 32px 24px;
+        }
+        h2 {
+            font-size: 24px;
+            color: #ffffff;
+            margin: 0 0 20px;
+            border-bottom: 1px solid rgba(106, 79, 255, 0.2);
+            padding-bottom: 12px;
+        }
+        .details {
+            background: rgba(106, 79, 255, 0.05);
+            border: 1px solid rgba(106, 79, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .line strong {
+            color: #a2a2b0;
+        }
+        .total-line {
+            border-top: 1px solid rgba(106, 79, 255, 0.2);
+            margin-top: 15px;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #32d1f4;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #a2a2b0;
+            text-align: center;
+        }
+        .footer a {
+            color: #6a4fff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h2>Invoice from <%= companyName %></h2>
+            <p>Hi <strong><%= name %></strong>,</p>
+            <p>Thank you for your purchase. Your payment has been processed successfully.</p>
+            
+            <div class="details">
+                <div class="line">
+                    <strong>Invoice ID:</strong>
+                    <span><%= invoiceId %></span>
+                </div>
+                <div class="line">
+                    <strong>Item / Service:</strong>
+                    <span><%= item %></span>
+                </div>
+                <div class="line total-line">
+                    <span>Total Amount:</span>
+                    <span><%= amount %></span>
+                </div>
+            </div>
+
+            <p>If you have any questions regarding this invoice, please feel free to reach out to our support team.</p>
+
+            <div class="footer">
+                © <%= new Date().getFullYear() %> <%= companyName %><br />
+                <a href="<%= frontendUrl %>"><%= companyName %></a> · 
+                <a href="mailto:<%= supportEmail %>">Support</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

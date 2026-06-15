@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Verify Email</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600&family=Grift:wght@600;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                background: #0a0a12;
+                font-family: 'Manrope', system-ui, sans-serif;
+                color: #e6e6f0;
+                line-height: 1.5;
+                margin: 0;
+                padding: 20px 12px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .wrapper {
+                max-width: 540px;
+                margin: 0 auto;
+            }
+            .container {
+                background: #1c1c28;
+                border: 1px solid rgba(106, 79, 255, 0.2);
+                border-radius: 16px;
+                padding: 32px 24px;
+                text-align: center;
+            }
+            .logo {
+                display: block;
+                margin: 0 auto 24px;
+                max-width: 100%;
+            }
+            h2 {
+                font-family: 'Grift', sans-serif;
+                font-size: 26px;
+                font-weight: 700;
+                color: #ffffff;
+                margin: 0 0 12px;
+            }
+            .greeting {
+                font-size: 15px;
+                color: #a2a2b0;
+                margin-bottom: 8px;
+            }
+            .greeting strong {
+                color: #6a4fff;
+            }
+            .message {
+                font-size: 14.5px;
+                color: #a2a2b0;
+                margin: 0 0 24px;
+            }
+            .otp-wrapper {
+                margin: 24px 0 32px;
+            }
+            .otp-box {
+                font-family: 'Grift', monospace;
+                font-size: 28px;
+                font-weight: 600;
+                letter-spacing: 10px;
+                color: #32d1f4;
+                background: rgba(50, 209, 244, 0.1);
+                border: 1px solid rgba(50, 209, 244, 0.3);
+                border-radius: 12px;
+                padding: 14px 36px;
+                display: inline-block;
+            }
+            .btn {
+                display: inline-block;
+                background: #6a4fff;
+                color: #ffffff;
+                padding: 12px 32px;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 15px;
+                margin: 0 auto 28px;
+            }
+            .note {
+                font-size: 13px;
+                color: #a2a2b0;
+                margin: 0 0 28px;
+            }
+            .note strong {
+                color: #ff49bb;
+            }
+            .footer {
+                font-size: 12px;
+                color: #a2a2b0;
+                border-top: 1px solid rgba(106, 79, 255, 0.15);
+                padding-top: 20px;
+            }
+            .footer a {
+                color: #6a4fff;
+                text-decoration: none;
+            }
+            @media (max-width: 600px) {
+                .container {
+                    padding: 28px 20px;
+                }
+                h2 {
+                    font-size: 24px;
+                }
+                .otp-box {
+                    font-size: 24px;
+                    letter-spacing: 8px;
+                    padding: 12px 28px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="container">
+                <img
+                    class="logo"
+                    src="https://res.cloudinary.com/dcyupktj6/image/upload/w_180,h_180,c_fit,q_auto,f_auto/v1770200775/uploads/iufo6oibhskziwgmloo3.png"
+                    alt="<%= companyName %>"
+                    width="90"
+                    style="display: block; margin: 0 auto 24px; border: 0"
+                />
+
+                <h2>Verify Your Email</h2>
+
+                <p class="greeting">Hi <strong><%= name %></strong>,</p>
+
+                <p class="message">Use this code to verify your email:</p>
+
+                <div class="otp-wrapper">
+                    <div class="otp-box"><%= otp %></div>
+                </div>
+
+                <a
+                    href="<%= verifyUrl %>"
+                    class="btn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Verify Email
+                </a>
+
+                <p class="note">
+                    Code expires in <strong>10 minutes</strong>.<br />
+                    Not you? Just ignore this email.
+                </p>
+
+                <div class="footer">
+                    © <%= new Date().getFullYear() %> <%= companyName %><br />
+                    <a href="<%= frontendUrl %>"><%= companyName %></a> ·
+                    <a href="mailto:<%= supportEmail %>">Support</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

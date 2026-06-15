@@ -1,0 +1,59 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Build Outputs ───────────────────────────────────────────────────────────
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ─── Prisma Generated Client ─────────────────────────────────────────────────
+# Keep schema.prisma but exclude the generated client code
+**/prisma/generated/
+
+# ─── Environment Variables ───────────────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+# Keep example files
+!.env.example
+
+# ─── Turbo Cache ─────────────────────────────────────────────────────────────
+.turbo/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ─── OS & Editor ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*.suo
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Test & Coverage ─────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ─── Misc ────────────────────────────────────────────────────────────────────
+*.pem
+.cache/
+tmp/
+temp/

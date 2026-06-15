@@ -1,0 +1,127 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String?   @unique
+  phone           String?   @unique
+  passwordHash    String?
+  status          UserStatus @default(PENDING)
+  role            UserRole  @default(CUSTOMER)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  verificationCodes  VerificationCode[]
+  refreshTokens      RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  mfaConfig          MfaConfig?
+  loginHistory       LoginHistory[]
+  oauthAccounts      OauthAccount[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  MANAGER
+  SUPPORT
+}
+
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  LOCKED
+  DELETED
+}
+
+model VerificationCode {
+  id          String    @id @default(uuid())
+  userId      String
+  code        String    // 5-digit, stored hashed
+  expiresAt   DateTime
+  attempts    Int       @default(0)
+  resendCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  tokenHash   String    @unique
+  family      String    // Token rotation family — detect reuse attacks
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([tokenHash])
+  @@index([userId])
+}
+
+model MfaConfig {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  type          MfaType
+  totpSecret    String?   // AES-256 encrypted
+  phoneNumber   String?
+  backupCodes   BackupCode[]
+  enabledAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+enum MfaType {
+  TOTP
+  SMS
+}
+
+model BackupCode {
+  id          String    @id @default(uuid())
+  mfaConfigId String
+  codeHash    String
+  usedAt      DateTime?
+  mfaConfig   MfaConfig @relation(fields: [mfaConfigId], references: [id])
+}
+
+model LoginHistory {
+  id          String    @id @default(uuid())
+  userId      String
+  success     Boolean
+  ipAddress   String
+  userAgent   String
+  reason      String?   // 'invalid_password', 'mfa_failed', etc.
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model PasswordResetToken {
+  id          String    @id @default(uuid())
+  userId      String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model OauthAccount {
+  id           String  @id @default(uuid())
+  userId       String
+  provider     String  // 'google', 'apple'
+  providerId   String
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerId])
+}

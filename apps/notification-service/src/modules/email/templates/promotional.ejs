@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= subject %></title>
+    <style>
+        body {
+            background: #0a0a12;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #e6e6f0;
+            margin: 0;
+            padding: 20px 12px;
+            text-align: center;
+        }
+        .wrapper {
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #1c1c28;
+            border: 1px solid rgba(106, 79, 255, 0.2);
+            border-radius: 16px;
+            padding: 40px 24px;
+        }
+        h1 {
+            font-size: 28px;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+        .content {
+            font-size: 15px;
+            color: #a2a2b0;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background: #6a4fff;
+            color: #ffffff;
+            padding: 14px 36px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 14px rgba(106, 79, 255, 0.4);
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #a2a2b0;
+            border-top: 1px solid rgba(106, 79, 255, 0.15);
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #6a4fff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1><%= title %></h1>
+            
+            <p class="content"><%= content %></p>
+
+            <a href="<%= offerUrl %>" class="btn" target="_blank" rel="noopener noreferrer">
+                Claim Offer
+            </a>
+
+            <div class="footer">
+                You are receiving this because you signed up for updates from <%= companyName %>.<br />
+                <a href="<%= frontendUrl %>">Unsubscribe</a> · 
+                <a href="<%= frontendUrl %>">Manage Preferences</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
