@@ -1,3 +1,10 @@
+export const PRODUCT_EVENTS = {
+  CREATED: 'product.created',
+  UPDATED: 'product.updated',
+  DELETED: 'product.deleted',
+  STATUS_CHANGED: 'product.status_changed',
+} as const;
+
 export const ORDER_EVENTS = {
   CREATED: 'order.created',
   STATUS_CHANGED: 'order.status_changed',

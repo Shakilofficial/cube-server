@@ -1,0 +1,119 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+// ─── Product ──────────────────────────────────────────────────────────────────
+
+model Product {
+  id          String          @id @default(uuid())
+  sku         String          @unique // Immutable after creation
+  name        String
+  slug        String          @unique
+  description String?
+  price       Decimal         @db.Decimal(10, 2)
+  brandId     String
+  status      ProductStatus   @default(DRAFT)
+  images      ProductImage[]
+  categories  ProductCategory[]
+  reviews     ProductReview[]
+  metadata    Json?           // SEO fields, attributes, avgRating cache
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  brand       Brand           @relation(fields: [brandId], references: [id])
+
+  @@index([status, brandId])
+  @@index([slug])
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  DISCONTINUED
+}
+
+// ─── Brand ────────────────────────────────────────────────────────────────────
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  logoUrl     String?
+  description String?
+  website     String?
+  seoTitle    String?
+  seoDesc     String?
+  products    Product[]
+}
+
+// ─── Category ─────────────────────────────────────────────────────────────────
+
+model Category {
+  id       String            @id @default(uuid())
+  name     String
+  slug     String            @unique
+  parentId String?
+  level    Int               @default(0) // Denormalised for performance
+  parent   Category?         @relation(name: "CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[]        @relation(name: "CategoryHierarchy")
+  products ProductCategory[]
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
+}
+
+// ─── Product Image ────────────────────────────────────────────────────────────
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  url       String  // Original (max 2048px WebP)
+  thumbSmUrl String // 200×200 WebP
+  thumbMdUrl String // 400×400 WebP
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ─── Product Review ───────────────────────────────────────────────────────────
+
+model ProductReview {
+  id               String              @id @default(uuid())
+  productId        String
+  userId           String
+  rating           Int                 // 1–5
+  comment          String?
+  status           ReviewStatus        @default(PENDING)
+  verifiedPurchase Boolean             @default(false)
+  helpfulVotes     Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  product          Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  votes            ReviewHelpfulVote[]
+
+  @@unique([productId, userId]) // One review per user per product
+  @@index([productId, status])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ReviewHelpfulVote {
+  userId   String
+  reviewId String
+  review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reviewId])
+}

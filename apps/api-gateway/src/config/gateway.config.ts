@@ -7,6 +7,8 @@ export const GatewayConfigSchema = z.object({
   AUTH_SERVICE_URL: z.string().url().default('http://localhost:3001'),
   USER_SERVICE_URL: z.string().url().default('http://localhost:3002'),
   NOTIFICATION_SERVICE_URL: z.string().url().default('http://localhost:3003'),
+  PRODUCT_SERVICE_URL: z.string().url().default('http://localhost:3004'),
+  SEARCH_SERVICE_URL: z.string().url().default('http://localhost:3005'),
   JWT_ACCESS_SECRET: z.string().min(32).default('supersecretjwtaccesssecretkey123456'),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 });

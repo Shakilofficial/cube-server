@@ -32,6 +32,24 @@ const IMAGE_PRESETS = {
     jpegQuality: 82,
     pngCompressionLevel: 8,
   },
+  /** Product thumbnail — small (200×200) */
+  'thumbnail-sm': {
+    width: 200,
+    height: 200,
+    fit: 'cover' as const,
+    webpQuality: 80,
+    jpegQuality: 80,
+    pngCompressionLevel: 8,
+  },
+  /** Product thumbnail — medium (400×400) */
+  'thumbnail-md': {
+    width: 400,
+    height: 400,
+    fit: 'cover' as const,
+    webpQuality: 82,
+    jpegQuality: 82,
+    pngCompressionLevel: 8,
+  },
 } as const;
 
 export type ImagePreset = keyof typeof IMAGE_PRESETS;
@@ -86,7 +104,7 @@ export class FileProcessorService {
       // Rotate based on EXIF orientation metadata (important for mobile shots)
       pipeline = pipeline.rotate();
 
-      if (preset === 'avatar') {
+      if (preset === 'avatar' || preset === 'thumbnail-sm' || preset === 'thumbnail-md') {
         const { width, height, fit } = options as typeof IMAGE_PRESETS['avatar'];
         pipeline = pipeline.resize({ width, height, fit, withoutEnlargement: true });
       } else {

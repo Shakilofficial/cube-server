@@ -61,6 +61,61 @@ async function bootstrap() {
     }
   }));
 
+  // Route /v1/products/* to product-service
+  app.use('/v1/products', proxy(config.PRODUCT_SERVICE_URL, {
+    proxyReqPathResolver: (req) => '/v1/products' + req.url,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      if (srcReq.headers['x-correlation-id']) {
+        proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+      }
+      return proxyReqOpts;
+    },
+  }));
+
+  // Route /v1/brands/* to product-service
+  app.use('/v1/brands', proxy(config.PRODUCT_SERVICE_URL, {
+    proxyReqPathResolver: (req) => '/v1/brands' + req.url,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      if (srcReq.headers['x-correlation-id']) {
+        proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+      }
+      return proxyReqOpts;
+    },
+  }));
+
+  // Route /v1/categories/* to product-service
+  app.use('/v1/categories', proxy(config.PRODUCT_SERVICE_URL, {
+    proxyReqPathResolver: (req) => '/v1/categories' + req.url,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      if (srcReq.headers['x-correlation-id']) {
+        proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+      }
+      return proxyReqOpts;
+    },
+  }));
+
+  // Route /v1/reviews/* to product-service
+  app.use('/v1/reviews', proxy(config.PRODUCT_SERVICE_URL, {
+    proxyReqPathResolver: (req) => '/v1/reviews' + req.url,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      if (srcReq.headers['x-correlation-id']) {
+        proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+      }
+      return proxyReqOpts;
+    },
+  }));
+
+  // Route /v1/search/* to search-service
+  app.use('/v1/search', proxy(config.SEARCH_SERVICE_URL, {
+    proxyReqPathResolver: (req) => '/v1/search' + req.url,
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      if (srcReq.headers['x-correlation-id']) {
+        proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+      }
+      return proxyReqOpts;
+    },
+  }));
+
   await app.listen(config.PORT);
 
   async function checkConnectionWithRetry(urlStr: string, defaultPort: number, retries = 8, delay = 1500): Promise<boolean> {
@@ -74,11 +129,13 @@ async function bootstrap() {
 
   // Delay connection checks slightly to allow downstream services to begin booting
   setTimeout(async () => {
-    const [authUp, userUp, notificationUp, redisUp] = await Promise.all([
+    const [authUp, userUp, notificationUp, redisUp, productUp, searchUp] = await Promise.all([
       checkConnectionWithRetry(config.AUTH_SERVICE_URL, 3001),
       checkConnectionWithRetry(config.USER_SERVICE_URL, 3002),
       checkConnectionWithRetry(config.NOTIFICATION_SERVICE_URL, 3003),
       checkConnectionWithRetry(config.REDIS_URL, 6379),
+      checkConnectionWithRetry(config.PRODUCT_SERVICE_URL, 3004),
+      checkConnectionWithRetry(config.SEARCH_SERVICE_URL, 3005),
     ]);
 
     logStartupBanner('API Gateway', {
@@ -88,6 +145,8 @@ async function bootstrap() {
       'User Microservice': userUp,
       'Notification Microservice': notificationUp,
       'Redis Cache': redisUp,
+      'Product Microservice': productUp,
+      'Search Microservice': searchUp,
     });
   }, 1000);
 }
