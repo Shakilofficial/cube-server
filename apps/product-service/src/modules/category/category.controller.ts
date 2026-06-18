@@ -10,7 +10,11 @@ import {
   Post,
   UseGuards,
   Version,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { IMAGE_MIME_TYPES, multerConfig } from '@cube/storage';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -74,5 +78,27 @@ export class CategoryController {
   @ResponseMessage('Category deleted successfully')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
+  }
+
+  @Post(':id/icon')
+  @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Icon uploaded successfully')
+  @UseInterceptors(
+    FileInterceptor(
+      'icon',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  uploadIcon(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.categoryService.uploadIcon(id, file);
   }
 }

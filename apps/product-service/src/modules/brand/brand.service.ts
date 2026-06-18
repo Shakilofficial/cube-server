@@ -9,20 +9,25 @@ import { PrismaService } from '../../core/prisma/prisma.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { paginationHelper } from '@cube/common';
-import slugify from 'slugify';
+import { generateSlug } from '../../common/helpers';
+import { StorageService } from '@cube/storage';
+
 
 @Injectable()
 export class BrandService {
   private readonly logger = new Logger(BrandService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
   // Create
   // ─────────────────────────────────────────────────────────────────────────
 
   async create(dto: CreateBrandDto) {
-    const slug = this.generateSlug(dto.name);
+    const slug = generateSlug(dto.name);
 
     const existing = await this.prisma.brand.findFirst({
       where: { OR: [{ name: dto.name }, { slug }] },
@@ -93,7 +98,7 @@ export class BrandService {
     const data: any = { ...dto };
 
     if (dto.name) {
-      const slug = this.generateSlug(dto.name);
+      const slug = generateSlug(dto.name);
       const conflict = await this.prisma.brand.findFirst({
         where: { OR: [{ name: dto.name }, { slug }], NOT: { id } },
       });
@@ -111,7 +116,7 @@ export class BrandService {
   // ─────────────────────────────────────────────────────────────────────────
 
   async remove(id: string) {
-    await this.findOne(id);
+    const brand = await this.findOne(id);
 
     const productCount = await this.prisma.product.count({ where: { brandId: id } });
     if (productCount > 0) {
@@ -120,15 +125,31 @@ export class BrandService {
       );
     }
 
+    if (brand.logoUrl) {
+      await this.storageService.delete(brand.logoUrl).catch(() => {});
+    }
+
     await this.prisma.brand.delete({ where: { id } });
     return { message: 'Brand deleted successfully.' };
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────────────────
+  async uploadLogo(id: string, file: Express.Multer.File) {
+    const brand = await this.findOne(id);
 
-  private generateSlug(name: string): string {
-    return slugify(name, { lower: true, strict: true, trim: true });
+    const uploadResult = await this.storageService.upload(file.buffer, {
+      folder: `brands/${id}`,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      imagePreset: 'image',
+    });
+
+    if (brand.logoUrl) {
+      await this.storageService.delete(brand.logoUrl).catch(() => {});
+    }
+
+    return this.prisma.brand.update({
+      where: { id },
+      data: { logoUrl: uploadResult.url },
+    });
   }
 }

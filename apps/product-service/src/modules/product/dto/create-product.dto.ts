@@ -1,21 +1,21 @@
-import {
-  IsString,
-  IsOptional,
-  IsUUID,
-  IsArray,
-  IsDecimal,
-  IsObject,
-  MinLength,
-  MaxLength,
-  IsPositive,
-} from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsObject,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 
 export class CreateProductDto {
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  @MaxLength(20)
-  sku: string;
+  @MaxLength(50)
+  sku?: string;
 
   @IsString()
   @MinLength(2)

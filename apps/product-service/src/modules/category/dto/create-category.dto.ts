@@ -15,4 +15,9 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsUUID()
   parentId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  iconUrl?: string;
 }

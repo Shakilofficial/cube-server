@@ -52,7 +52,7 @@ export class ProductIndexService implements OnModuleInit {
           properties: {
             id:            { type: 'keyword' },
             sku:           { type: 'keyword' },
-            name:          { type: 'text', analyzer: 'standard', boost: 3 },
+            name:          { type: 'text', analyzer: 'standard' },
             description:   { type: 'text', analyzer: 'standard' },
             brandName:     { type: 'text', fields: { keyword: { type: 'keyword' } } },
             categoryNames: { type: 'text', fields: { keyword: { type: 'keyword' } } },

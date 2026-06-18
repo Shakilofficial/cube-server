@@ -8,20 +8,25 @@ import {
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import slugify from 'slugify';
+import { generateSlug, buildCategoryTree, guardCircularReference } from '../../common/helpers';
+import { StorageService } from '@cube/storage';
+
 
 @Injectable()
 export class CategoryService {
   private readonly logger = new Logger(CategoryService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
   // Create
   // ─────────────────────────────────────────────────────────────────────────
 
   async create(dto: CreateCategoryDto) {
-    const slug = this.generateSlug(dto.name);
+    const slug = generateSlug(dto.name);
 
     const existing = await this.prisma.category.findUnique({ where: { slug } });
     if (existing) {
@@ -45,6 +50,7 @@ export class CategoryService {
         slug,
         parentId: dto.parentId ?? null,
         level,
+        iconUrl: dto.iconUrl ?? null,
       },
       include: { parent: true },
     });
@@ -60,7 +66,7 @@ export class CategoryService {
       orderBy: [{ level: 'asc' }, { name: 'asc' }],
       include: { _count: { select: { products: true } } },
     });
-    return this.buildTree(all);
+    return buildCategoryTree(all);
   }
 
   async findOne(id: string) {
@@ -89,12 +95,12 @@ export class CategoryService {
       if (dto.parentId === id) {
         throw new BadRequestException('A category cannot be its own parent.');
       }
-      await this.guardCircularReference(id, dto.parentId);
+      await guardCircularReference(this.prisma, id, dto.parentId);
     }
 
     const data: any = {};
     if (dto.name) {
-      const slug = this.generateSlug(dto.name);
+      const slug = generateSlug(dto.name);
       const conflict = await this.prisma.category.findFirst({
         where: { slug, NOT: { id } },
       });
@@ -117,6 +123,10 @@ export class CategoryService {
       }
     }
 
+    if (dto.iconUrl !== undefined) {
+      data.iconUrl = dto.iconUrl ?? null;
+    }
+
     return this.prisma.category.update({
       where: { id },
       data,
@@ -129,7 +139,7 @@ export class CategoryService {
   // ─────────────────────────────────────────────────────────────────────────
 
   async remove(id: string) {
-    await this.findOne(id);
+    const category = await this.findOne(id);
 
     const childCount = await this.prisma.category.count({
       where: { parentId: id },
@@ -149,55 +159,32 @@ export class CategoryService {
       );
     }
 
+    if (category.iconUrl) {
+      await this.storageService.delete(category.iconUrl).catch(() => {});
+    }
+
     await this.prisma.category.delete({ where: { id } });
     return { message: 'Category deleted successfully.' };
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Circular reference guard (spec 2.2)
-  // ─────────────────────────────────────────────────────────────────────────
+  async uploadIcon(id: string, file: Express.Multer.File) {
+    const category = await this.findOne(id);
 
-  /**
-   * Walk up the ancestor chain from `parentId`. If we encounter `id` at any
-   * point, the assignment would create a cycle — throw BadRequestException.
-   */
-  private async guardCircularReference(
-    id: string,
-    parentId: string | null,
-  ): Promise<void> {
-    let current = parentId;
-    while (current) {
-      if (current === id) {
-        throw new BadRequestException('Circular category reference detected.');
-      }
-      const parent = await this.prisma.category.findUnique({
-        where: { id: current },
-        select: { parentId: true },
-      });
-      current = parent?.parentId ?? null;
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────────────────
-
-  private generateSlug(name: string): string {
-    return slugify(name, { lower: true, strict: true, trim: true });
-  }
-
-  private buildTree(categories: any[]): any[] {
-    const map = new Map<string, any>();
-    categories.forEach((c) => map.set(c.id, { ...c, children: [] }));
-
-    const roots: any[] = [];
-    map.forEach((cat) => {
-      if (cat.parentId && map.has(cat.parentId)) {
-        map.get(cat.parentId).children.push(cat);
-      } else {
-        roots.push(cat);
-      }
+    const uploadResult = await this.storageService.upload(file.buffer, {
+      folder: `categories/${id}`,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      imagePreset: 'image',
     });
-    return roots;
+
+    if (category.iconUrl) {
+      await this.storageService.delete(category.iconUrl).catch(() => {});
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: { iconUrl: uploadResult.url },
+      include: { parent: true },
+    });
   }
 }

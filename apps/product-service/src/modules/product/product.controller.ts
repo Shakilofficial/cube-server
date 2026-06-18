@@ -19,6 +19,8 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
+import { UpdateStatusDto } from './dto/update-status.dto';
+import { CreateBulkProductsDto } from './dto/create-bulk.dto';
 import {
   JwtAuthGuard,
   Roles,
@@ -27,13 +29,6 @@ import {
   ResponseMessage,
 } from '@cube/common';
 import { IMAGE_MIME_TYPES, multerConfig } from '@cube/storage';
-import { IsEnum, IsString } from 'class-validator';
-
-class UpdateStatusDto {
-  @IsString()
-  @IsEnum(['DRAFT', 'ACTIVE', 'DISCONTINUED'])
-  status: string;
-}
 
 @Controller('products')
 export class ProductController {
@@ -78,6 +73,16 @@ export class ProductController {
   @ResponseMessage('Product created successfully')
   create(@Body() dto: CreateProductDto) {
     return this.productService.create(dto);
+  }
+
+  @Post('bulk')
+  @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ResponseMessage('Bulk products created successfully')
+  createBulk(@Body() dto: CreateBulkProductsDto) {
+    return this.productService.createBulk(dto);
   }
 
   @Patch(':id')

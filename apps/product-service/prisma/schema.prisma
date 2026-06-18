@@ -56,8 +56,9 @@ model Category {
   id       String            @id @default(uuid())
   name     String
   slug     String            @unique
+  iconUrl  String?
   parentId String?
-  level    Int               @default(0) // Denormalised for performance
+  level    Int               @default(0)
   parent   Category?         @relation(name: "CategoryHierarchy", fields: [parentId], references: [id])
   children Category[]        @relation(name: "CategoryHierarchy")
   products ProductCategory[]

@@ -11,7 +11,11 @@ import {
   Query,
   UseGuards,
   Version,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { IMAGE_MIME_TYPES, multerConfig } from '@cube/storage';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
@@ -79,5 +83,27 @@ export class BrandController {
   @ResponseMessage('Brand deleted successfully')
   remove(@Param('id') id: string) {
     return this.brandService.remove(id);
+  }
+
+  @Post(':id/logo')
+  @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Logo uploaded successfully')
+  @UseInterceptors(
+    FileInterceptor(
+      'logo',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  uploadLogo(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.brandService.uploadLogo(id, file);
   }
 }

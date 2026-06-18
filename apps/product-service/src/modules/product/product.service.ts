@@ -12,31 +12,20 @@ import { StorageService } from '@cube/storage';
 import { PRODUCT_EVENTS, paginationHelper } from '@cube/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { QueryProductDto, ProductSortBy } from './dto/query-product.dto';
-import slugify from 'slugify';
+import { QueryProductDto } from './dto/query-product.dto';
+import { CreateBulkProductsDto } from './dto/create-bulk.dto';
+import {
+  generateUniqueSlug,
+  buildOrderBy,
+  buildWhereClause,
+  buildInternalSearchWhereClause,
+  validateCategoryIds,
+  buildProductDocument,
+  ProductDocument,
+  PRODUCT_INCLUDE,
+  generateUniqueSku,
+} from '../../common/helpers';
 
-/** Shape pushed to RabbitMQ / Elasticsearch */
-export interface ProductDocument {
-  id: string;
-  sku: string;
-  name: string;
-  description: string;
-  brandName: string;
-  categoryNames: string[];
-  price: number;
-  status: string;
-  avgRating: number;
-  reviewCount: number;
-  inStock: boolean;
-  createdAt: string;
-}
-
-const PRODUCT_INCLUDE = {
-  brand: true,
-  images: { orderBy: [{ isPrimary: 'desc' as const }, { sortOrder: 'asc' as const }] },
-  categories: { include: { category: true } },
-  _count: { select: { reviews: true } },
-} as const;
 
 @Injectable()
 export class ProductService {
@@ -57,21 +46,31 @@ export class ProductService {
     const brand = await this.prisma.brand.findUnique({ where: { id: dto.brandId } });
     if (!brand) throw new NotFoundException(`Brand ${dto.brandId} not found.`);
 
-    // Validate SKU uniqueness
-    const existingSku = await this.prisma.product.findUnique({ where: { sku: dto.sku } });
-    if (existingSku) throw new ConflictException(`SKU "${dto.sku}" is already in use.`);
+    let sku = dto.sku;
+    if (!sku) {
+      sku = await generateUniqueSku(
+        this.prisma,
+        brand.name,
+        dto.name,
+        dto.metadata,
+      );
+    } else {
+      // Validate SKU uniqueness
+      const existingSku = await this.prisma.product.findUnique({ where: { sku } });
+      if (existingSku) throw new ConflictException(`SKU "${sku}" is already in use.`);
+    }
 
     // Generate unique slug
-    const slug = await this.generateUniqueSlug(dto.name);
+    const slug = await generateUniqueSlug(this.prisma, dto.name);
 
     // Validate categories
     if (dto.categoryIds?.length) {
-      await this.validateCategoryIds(dto.categoryIds);
+      await validateCategoryIds(this.prisma, dto.categoryIds);
     }
 
     const product = await this.prisma.product.create({
       data: {
-        sku: dto.sku,
+        sku,
         name: dto.name,
         slug,
         description: dto.description,
@@ -91,6 +90,67 @@ export class ProductService {
     return product;
   }
 
+  async createBulk(dto: CreateBulkProductsDto) {
+    const products = await this.prisma.$transaction(async (tx) => {
+      const createdProducts = [];
+      for (const productDto of dto.products) {
+        // Validate brand
+        const brand = await tx.brand.findUnique({ where: { id: productDto.brandId } });
+        if (!brand) throw new NotFoundException(`Brand ${productDto.brandId} not found.`);
+
+        let sku = productDto.sku;
+        if (!sku) {
+          sku = await generateUniqueSku(
+            tx,
+            brand.name,
+            productDto.name,
+            productDto.metadata,
+          );
+        } else {
+          // Validate SKU uniqueness
+          const existingSku = await tx.product.findUnique({ where: { sku } });
+          if (existingSku) throw new ConflictException(`SKU "${sku}" is already in use.`);
+        }
+
+        // Generate unique slug
+        const slug = await generateUniqueSlug(tx, productDto.name);
+
+        // Validate categories
+        if (productDto.categoryIds?.length) {
+          await validateCategoryIds(tx, productDto.categoryIds);
+        }
+
+        const product = await tx.product.create({
+          data: {
+            sku,
+            name: productDto.name,
+            slug,
+            description: productDto.description,
+            price: productDto.price,
+            brandId: productDto.brandId,
+            metadata: productDto.metadata ?? {},
+            categories: productDto.categoryIds?.length
+              ? {
+                  create: productDto.categoryIds.map((categoryId) => ({ categoryId })),
+                }
+              : undefined,
+          },
+          include: PRODUCT_INCLUDE,
+        });
+
+        createdProducts.push(product);
+      }
+      return createdProducts;
+    });
+
+    // Publish event for each product after commit
+    for (const product of products) {
+      await this.publishEvent(PRODUCT_EVENTS.CREATED, product);
+    }
+
+    return products;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // Read
   // ─────────────────────────────────────────────────────────────────────────
@@ -101,27 +161,9 @@ export class ProductService {
       limit: query.limit,
     });
 
-    const where: any = {};
-    if (query.status) where.status = query.status;
-    if (query.brandId) where.brandId = query.brandId;
-    if (query.categoryId) {
-      where.categories = { some: { categoryId: query.categoryId } };
-    }
-    if (query.priceMin !== undefined || query.priceMax !== undefined) {
-      where.price = {};
-      if (query.priceMin !== undefined) where.price.gte = query.priceMin;
-      if (query.priceMax !== undefined) where.price.lte = query.priceMax;
-    }
-    if (query.search) {
-      where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { sku: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } },
-      ];
-    }
+    const where = buildWhereClause(query);
 
-    const orderBy = this.buildOrderBy(query.sortBy);
-
+    const orderBy = buildOrderBy(query.sortBy);
     const [total, data] = await this.prisma.$transaction([
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
@@ -139,13 +181,7 @@ export class ProductService {
   /** Internal endpoint used as search-service PostgreSQL fallback */
   async internalSearch(query: { search?: string; page?: number; limit?: number }) {
     const { page, limit, skip } = paginationHelper.calculatePagination(query);
-    const where: any = { status: 'ACTIVE' };
-    if (query.search) {
-      where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { sku: { contains: query.search, mode: 'insensitive' } },
-      ];
-    }
+    const where = buildInternalSearchWhereClause(query);
     const products = await this.prisma.product.findMany({
       where,
       skip,
@@ -189,13 +225,12 @@ export class ProductService {
     };
 
     if (dto.name) {
-      data.slug = await this.generateUniqueSlug(dto.name, id);
+      data.slug = await generateUniqueSlug(this.prisma, dto.name, id);
     }
 
-    // Replace categories if provided
     if (dto.categoryIds !== undefined) {
       if (dto.categoryIds.length) {
-        await this.validateCategoryIds(dto.categoryIds);
+        await validateCategoryIds(this.prisma, dto.categoryIds);
       }
       await this.prisma.productCategory.deleteMany({ where: { productId: id } });
       if (dto.categoryIds.length) {
@@ -371,69 +406,8 @@ export class ProductService {
   // Helpers
   // ─────────────────────────────────────────────────────────────────────────
 
-  private async generateUniqueSlug(name: string, excludeId?: string): Promise<string> {
-    const base = slugify(name, { lower: true, strict: true, trim: true });
-    let slug = base;
-    let counter = 1;
-
-    while (true) {
-      const existing = await this.prisma.product.findFirst({
-        where: { slug, ...(excludeId && { NOT: { id: excludeId } }) },
-      });
-      if (!existing) return slug;
-      slug = `${base}-${counter++}`;
-    }
-  }
-
-  private async validateCategoryIds(ids: string[]): Promise<void> {
-    const found = await this.prisma.category.findMany({
-      where: { id: { in: ids } },
-      select: { id: true },
-    });
-    if (found.length !== ids.length) {
-      const foundIds = found.map((c) => c.id);
-      const missing = ids.filter((id) => !foundIds.includes(id));
-      throw new NotFoundException(`Categories not found: ${missing.join(', ')}`);
-    }
-  }
-
-  private buildOrderBy(sortBy?: ProductSortBy): any {
-    switch (sortBy) {
-      case ProductSortBy.PRICE_ASC:
-        return { price: 'asc' };
-      case ProductSortBy.PRICE_DESC:
-        return { price: 'desc' };
-      case ProductSortBy.NAME:
-        return { name: 'asc' };
-      default:
-        return { createdAt: 'desc' };
-    }
-  }
-
   async buildProductDocument(product: any): Promise<ProductDocument> {
-    const reviews = await this.prisma.productReview.findMany({
-      where: { productId: product.id, status: 'APPROVED' },
-      select: { rating: true },
-    });
-    const avgRating =
-      reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : 0;
-
-    return {
-      id: product.id,
-      sku: product.sku,
-      name: product.name,
-      description: product.description ?? '',
-      brandName: product.brand?.name ?? '',
-      categoryNames: product.categories?.map((pc: any) => pc.category?.name).filter(Boolean) ?? [],
-      price: Number(product.price),
-      status: product.status,
-      avgRating: Math.round(avgRating * 10) / 10,
-      reviewCount: reviews.length,
-      inStock: product.status === 'ACTIVE',
-      createdAt: product.createdAt.toISOString(),
-    };
+    return buildProductDocument(this.prisma, product);
   }
 
   private async publishEvent(event: string, product: any): Promise<void> {
