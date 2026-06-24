@@ -1271,7 +1271,7 @@
               ]
             },
             {
-              "name": "Update Brand",
+              "name": "Update Brand (with Logo Upload)",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -1282,13 +1282,49 @@
                   }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"description\": \"Samsung Electronics & Appliance global brand\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: brand display name",
+                      "disabled": true
+                    },
+                    {
+                      "key": "description",
+                      "value": "Samsung Electronics & Appliance global brand",
+                      "type": "text",
+                      "description": "Optional: short brand description"
+                    },
+                    {
+                      "key": "website",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: brand website URL",
+                      "disabled": true
+                    },
+                    {
+                      "key": "seoTitle",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: SEO title",
+                      "disabled": true
+                    },
+                    {
+                      "key": "seoDesc",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: SEO description",
+                      "disabled": true
+                    },
+                    {
+                      "key": "logo",
+                      "type": "file",
+                      "description": "Optional: brand logo image (JPEG/PNG/WebP/GIF/AVIF, max 5 MB). Compressed to WebP and uploaded to S3. Old logo auto-deleted.",
+                      "disabled": true
                     }
-                  }
+                  ]
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands/{{brandId}}",
@@ -1300,7 +1336,8 @@
                     "brands",
                     "{{brandId}}"
                   ]
-                }
+                },
+                "description": "Update a brand's metadata and/or logo in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field       | Type   | Required | Notes |\n|-------------|--------|----------|-------|\n| name        | string | No       | Brand display name |\n| description | string | No       | Short description |\n| website     | string | No       | Brand website URL |\n| seoTitle    | string | No       | SEO title |\n| seoDesc     | string | No       | SEO description |\n| logo        | file   | No       | JPEG/PNG/WebP/GIF/AVIF, max 5 MB. Compressed to WebP + uploaded to S3. Old logo auto-deleted. |\n\nAt least one field must be present."
               },
               "response": []
             },
@@ -1457,7 +1494,7 @@
               ]
             },
             {
-              "name": "Update Category",
+              "name": "Update Category (with Icon Upload)",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -1468,13 +1505,28 @@
                   }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Mobile Phones & Smartphones\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Mobile Phones & Smartphones",
+                      "type": "text",
+                      "description": "Optional: category display name"
+                    },
+                    {
+                      "key": "parentId",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: parent category ID (send empty string to remove parent / make root)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "icon",
+                      "type": "file",
+                      "description": "Optional: category icon image (JPEG/PNG/WebP/GIF/AVIF, max 5 MB). Compressed to WebP and uploaded to S3. Old icon auto-deleted.",
+                      "disabled": true
                     }
-                  }
+                  ]
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories/{{categoryId}}",
@@ -1486,7 +1538,8 @@
                     "categories",
                     "{{categoryId}}"
                   ]
-                }
+                },
+                "description": "Update a category's metadata and/or icon in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field    | Type   | Required | Notes |\n|----------|--------|----------|-------|\n| name     | string | No       | Category display name |\n| parentId | string | No       | Parent category ID. Send empty string to make root-level. |\n| icon     | file   | No       | JPEG/PNG/WebP/GIF/AVIF, max 5 MB. Compressed to WebP + uploaded to S3. Old icon auto-deleted. |\n\nAt least one field must be present."
               },
               "response": []
             },
@@ -1510,43 +1563,6 @@
                     "v1",
                     "categories",
                     "{{categoryId}}"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Upload Category Icon",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "{{accessToken}}",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "icon",
-                      "type": "file",
-                      "description": "Category icon image file (JPEG/PNG/WebP, max 5 MB)",
-                      "disabled": false
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/v1/categories/{{categoryId}}/icon",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories",
-                    "{{categoryId}}",
-                    "icon"
                   ]
                 }
               },

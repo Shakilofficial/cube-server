@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,27 +10,29 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
-  Version,
-  UseInterceptors,
   UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  Version,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IMAGE_MIME_TYPES, multerConfig } from '@cube/storage';
-import { BrandService } from './brand.service';
-import { CreateBrandDto } from './dto/create-brand.dto';
-import { UpdateBrandDto } from './dto/update-brand.dto';
+import { IMAGE_MIME_TYPES, StorageService, multerConfig } from '@cube/storage';
 import {
   JwtAuthGuard,
+  ResponseMessage,
   Roles,
   RolesGuard,
   UserRole,
-  ResponseMessage,
 } from '@cube/common';
+import { BrandService } from './brand.service';
+import { CreateBrandDto } from './dto/create-brand.dto';
 
 @Controller('brands')
 export class BrandController {
-  constructor(private readonly brandService: BrandService) {}
+  constructor(
+    private readonly brandService: BrandService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─── Public ──────────────────────────────────────────────────────────────
 
@@ -65,13 +68,94 @@ export class BrandController {
     return this.brandService.create(dto);
   }
 
+  /**
+   * PATCH /v1/brands/:id
+   *
+   * Accepts multipart/form-data with the following optional fields:
+   * - name        (string)
+   * - description (string)
+   * - website     (string)
+   * - seoTitle    (string)
+   * - seoDesc     (string)
+   * - logo        (file — JPEG, PNG, WebP, etc.)
+   *
+   * When a logo file is uploaded:
+   *   1. The file is processed and compressed by Sharp → WebP.
+   *   2. The result is uploaded to S3 under brands/<id>/
+   *   3. The old logo (if any) is deleted from S3.
+   *   4. The brand is updated with the new logoUrl.
+   *
+   * Text-only updates work exactly as before with a JSON body.
+   */
   @Patch(':id')
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Brand updated successfully')
-  update(@Param('id') id: string, @Body() dto: UpdateBrandDto) {
+  @UseInterceptors(
+    FileInterceptor(
+      'logo',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  async update(
+    @Param('id') id: string,
+    @UploadedFile() logoFile?: Express.Multer.File,
+    @Body('name') name?: string,
+    @Body('description') description?: string,
+    @Body('website') website?: string,
+    @Body('seoTitle') seoTitle?: string,
+    @Body('seoDesc') seoDesc?: string,
+  ) {
+    let logoUrl: string | undefined;
+
+    if (logoFile) {
+      // Fetch existing brand to get current logoUrl for deletion
+      const existing = await this.brandService.findOne(id);
+
+      // Upload new logo (compressed to WebP by StorageService)
+      const uploaded = await this.storageService.upload(logoFile.buffer, {
+        folder: `brands/${id}`,
+        originalName: logoFile.originalname,
+        mimeType: logoFile.mimetype,
+        imagePreset: 'image',
+        metadata: { brandId: id },
+      });
+
+      logoUrl = uploaded.url;
+
+      // Delete the previous logo from S3 if it exists
+      if (existing?.logoUrl) {
+        await this.storageService.delete(existing.logoUrl).catch(() => {});
+      }
+    }
+
+    // Validate that at least one field is being updated
+    if (!name && !description && !website && !seoTitle && !seoDesc && !logoFile) {
+      throw new BadRequestException(
+        'At least one field (name, description, website, seoTitle, seoDesc, or logo) must be provided.',
+      );
+    }
+
+    const dto: {
+      name?: string;
+      description?: string;
+      website?: string;
+      seoTitle?: string;
+      seoDesc?: string;
+      logoUrl?: string;
+    } = {};
+    if (name) dto.name = name.trim();
+    if (description) dto.description = description.trim();
+    if (website) dto.website = website.trim();
+    if (seoTitle) dto.seoTitle = seoTitle.trim();
+    if (seoDesc) dto.seoDesc = seoDesc.trim();
+    if (logoUrl) dto.logoUrl = logoUrl;
+
     return this.brandService.update(id, dto);
   }
 
@@ -83,27 +167,5 @@ export class BrandController {
   @ResponseMessage('Brand deleted successfully')
   remove(@Param('id') id: string) {
     return this.brandService.remove(id);
-  }
-
-  @Post(':id/logo')
-  @Version('1')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Logo uploaded successfully')
-  @UseInterceptors(
-    FileInterceptor(
-      'logo',
-      multerConfig({
-        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
-      }),
-    ),
-  )
-  uploadLogo(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.brandService.uploadLogo(id, file);
   }
 }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,27 +9,29 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
-  Version,
-  UseInterceptors,
   UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  Version,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IMAGE_MIME_TYPES, multerConfig } from '@cube/storage';
-import { CategoryService } from './category.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { IMAGE_MIME_TYPES, StorageService, multerConfig } from '@cube/storage';
 import {
   JwtAuthGuard,
+  ResponseMessage,
   Roles,
   RolesGuard,
   UserRole,
-  ResponseMessage,
 } from '@cube/common';
+import { CategoryService } from './category.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─── Public ──────────────────────────────────────────────────────────────
 
@@ -60,13 +63,78 @@ export class CategoryController {
     return this.categoryService.create(dto);
   }
 
+  /**
+   * PATCH /v1/categories/:id
+   *
+   * Accepts multipart/form-data with the following optional fields:
+   * - name      (string)
+   * - parentId  (string)
+   * - icon      (file — JPEG, PNG, WebP, etc.)
+   *
+   * When an icon file is uploaded:
+   *   1. The file is processed and compressed by Sharp → WebP.
+   *   2. The result is uploaded to S3 under categories/<id>/
+   *   3. The old icon (if any) is deleted from S3.
+   *   4. The category is updated with the new iconUrl.
+   *
+   * Text-only updates work exactly as before with a JSON body.
+   */
   @Patch(':id')
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Category updated successfully')
-  update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+  @UseInterceptors(
+    FileInterceptor(
+      'icon',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  async update(
+    @Param('id') id: string,
+    @UploadedFile() iconFile?: Express.Multer.File,
+    @Body('name') name?: string,
+    @Body('parentId') parentId?: string,
+  ) {
+    let iconUrl: string | undefined;
+
+    if (iconFile) {
+      // Fetch existing category to get current iconUrl for deletion
+      const existing = await this.categoryService.findOne(id);
+
+      // Upload new icon (compressed to WebP by StorageService)
+      const uploaded = await this.storageService.upload(iconFile.buffer, {
+        folder: `categories/${id}`,
+        originalName: iconFile.originalname,
+        mimeType: iconFile.mimetype,
+        imagePreset: 'image',
+        metadata: { categoryId: id },
+      });
+
+      iconUrl = uploaded.url;
+
+      // Delete the previous icon from S3 if it exists
+      if (existing?.iconUrl) {
+        await this.storageService.delete(existing.iconUrl).catch(() => {});
+      }
+    }
+
+    // Validate that at least one field is being updated
+    if (!name && !parentId && !iconFile) {
+      throw new BadRequestException(
+        'At least one field (name, parentId, or icon) must be provided.',
+      );
+    }
+
+    const dto: { name?: string; parentId?: string | null; iconUrl?: string } = {};
+    if (name) dto.name = name.trim();
+    if (parentId !== undefined) dto.parentId = parentId || null;
+    if (iconUrl) dto.iconUrl = iconUrl;
+
     return this.categoryService.update(id, dto);
   }
 
@@ -79,26 +147,5 @@ export class CategoryController {
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
   }
-
-  @Post(':id/icon')
-  @Version('1')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Icon uploaded successfully')
-  @UseInterceptors(
-    FileInterceptor(
-      'icon',
-      multerConfig({
-        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
-      }),
-    ),
-  )
-  uploadIcon(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.categoryService.uploadIcon(id, file);
-  }
 }
+

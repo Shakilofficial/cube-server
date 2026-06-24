@@ -167,24 +167,4 @@ export class CategoryService {
     return { message: 'Category deleted successfully.' };
   }
 
-  async uploadIcon(id: string, file: Express.Multer.File) {
-    const category = await this.findOne(id);
-
-    const uploadResult = await this.storageService.upload(file.buffer, {
-      folder: `categories/${id}`,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      imagePreset: 'image',
-    });
-
-    if (category.iconUrl) {
-      await this.storageService.delete(category.iconUrl).catch(() => {});
-    }
-
-    return this.prisma.category.update({
-      where: { id },
-      data: { iconUrl: uploadResult.url },
-      include: { parent: true },
-    });
-  }
 }

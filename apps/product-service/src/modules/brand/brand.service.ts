@@ -133,23 +133,4 @@ export class BrandService {
     return { message: 'Brand deleted successfully.' };
   }
 
-  async uploadLogo(id: string, file: Express.Multer.File) {
-    const brand = await this.findOne(id);
-
-    const uploadResult = await this.storageService.upload(file.buffer, {
-      folder: `brands/${id}`,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      imagePreset: 'image',
-    });
-
-    if (brand.logoUrl) {
-      await this.storageService.delete(brand.logoUrl).catch(() => {});
-    }
-
-    return this.prisma.brand.update({
-      where: { id },
-      data: { logoUrl: uploadResult.url },
-    });
-  }
 }
