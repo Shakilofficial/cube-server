@@ -1288,14 +1288,14 @@
                       "key": "name",
                       "value": "",
                       "type": "text",
-                      "description": "Optional: brand display name",
+                      "description": "Optional: brand name",
                       "disabled": true
                     },
                     {
                       "key": "description",
                       "value": "Samsung Electronics & Appliance global brand",
                       "type": "text",
-                      "description": "Optional: short brand description"
+                      "description": "Optional: brand description"
                     },
                     {
                       "key": "website",
@@ -1315,13 +1315,13 @@
                       "key": "seoDesc",
                       "value": "",
                       "type": "text",
-                      "description": "Optional: SEO description",
+                      "description": "Optional: SEO meta description",
                       "disabled": true
                     },
                     {
                       "key": "logo",
                       "type": "file",
-                      "description": "Optional: brand logo image (JPEG/PNG/WebP/GIF/AVIF, max 5 MB). Compressed to WebP and uploaded to S3. Old logo auto-deleted.",
+                      "description": "Optional: brand logo image file (JPEG/PNG/WebP, max 5 MB). Compressed to WebP and uploaded to S3. Old logo auto-deleted.",
                       "disabled": true
                     }
                   ]
@@ -1337,7 +1337,7 @@
                     "{{brandId}}"
                   ]
                 },
-                "description": "Update a brand's metadata and/or logo in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field       | Type   | Required | Notes |\n|-------------|--------|----------|-------|\n| name        | string | No       | Brand display name |\n| description | string | No       | Short description |\n| website     | string | No       | Brand website URL |\n| seoTitle    | string | No       | SEO title |\n| seoDesc     | string | No       | SEO description |\n| logo        | file   | No       | JPEG/PNG/WebP/GIF/AVIF, max 5 MB. Compressed to WebP + uploaded to S3. Old logo auto-deleted. |\n\nAt least one field must be present."
+                "description": "Update a brand's metadata and/or logo in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field       | Type   | Required | Notes |\n|-------------|--------|----------|-------|\n| name        | string | No       | Brand name |\n| description | string | No       | Brand description |\n| website     | string | No       | Brand website URL |\n| seoTitle    | string | No       | SEO page title |\n| seoDesc     | string | No       | SEO meta description |\n| logo        | file   | No       | JPEG/PNG/WebP, max 5 MB. Compressed to WebP + uploaded to S3. Old logo auto-deleted. |\n\nAt least one field must be present."
               },
               "response": []
             },
@@ -1361,43 +1361,6 @@
                     "v1",
                     "brands",
                     "{{brandId}}"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Upload Brand Logo",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "{{accessToken}}",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "logo",
-                      "type": "file",
-                      "description": "Brand logo image file (JPEG/PNG/WebP, max 5 MB)",
-                      "disabled": false
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/v1/brands/{{brandId}}/logo",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands",
-                    "{{brandId}}",
-                    "logo"
                   ]
                 }
               },
@@ -1511,19 +1474,19 @@
                       "key": "name",
                       "value": "Mobile Phones & Smartphones",
                       "type": "text",
-                      "description": "Optional: category display name"
+                      "description": "Optional: category name"
                     },
                     {
                       "key": "parentId",
                       "value": "",
                       "type": "text",
-                      "description": "Optional: parent category ID (send empty string to remove parent / make root)",
+                      "description": "Optional: parent category ID (pass empty string to make root-level)",
                       "disabled": true
                     },
                     {
                       "key": "icon",
                       "type": "file",
-                      "description": "Optional: category icon image (JPEG/PNG/WebP/GIF/AVIF, max 5 MB). Compressed to WebP and uploaded to S3. Old icon auto-deleted.",
+                      "description": "Optional: category icon image file (JPEG/PNG/WebP, max 5 MB). Compressed to WebP and uploaded to S3. Old icon auto-deleted.",
                       "disabled": true
                     }
                   ]
@@ -1539,7 +1502,7 @@
                     "{{categoryId}}"
                   ]
                 },
-                "description": "Update a category's metadata and/or icon in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field    | Type   | Required | Notes |\n|----------|--------|----------|-------|\n| name     | string | No       | Category display name |\n| parentId | string | No       | Parent category ID. Send empty string to make root-level. |\n| icon     | file   | No       | JPEG/PNG/WebP/GIF/AVIF, max 5 MB. Compressed to WebP + uploaded to S3. Old icon auto-deleted. |\n\nAt least one field must be present."
+                "description": "Update a category's metadata and/or icon in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field    | Type   | Required | Notes |\n|----------|--------|----------|-------|\n| name     | string | No       | Category name |\n| parentId | string | No       | Parent category ID. Pass empty string to make root-level. |\n| icon     | file   | No       | JPEG/PNG/WebP, max 5 MB. Compressed to WebP + uploaded to S3. Old icon auto-deleted. |\n\nAt least one field must be present."
               },
               "response": []
             },
