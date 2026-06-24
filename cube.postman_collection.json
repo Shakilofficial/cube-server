@@ -1234,13 +1234,45 @@
                   }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Samsung\",\n  \"description\": \"Electronics and technology giant\",\n  \"logoUrl\": \"https://example.com/samsung-logo.png\",\n  \"website\": \"https://samsung.com\",\n  \"seoTitle\": \"Samsung Products\",\n  \"seoDesc\": \"Buy authentic Samsung electronics\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Samsung",
+                      "type": "text",
+                      "description": "Required: brand name"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Electronics and technology giant",
+                      "type": "text",
+                      "description": "Optional: brand description"
+                    },
+                    {
+                      "key": "website",
+                      "value": "https://samsung.com",
+                      "type": "text",
+                      "description": "Optional: brand website URL"
+                    },
+                    {
+                      "key": "seoTitle",
+                      "value": "Samsung Products",
+                      "type": "text",
+                      "description": "Optional: SEO title"
+                    },
+                    {
+                      "key": "seoDesc",
+                      "value": "Buy authentic Samsung electronics",
+                      "type": "text",
+                      "description": "Optional: SEO meta description"
+                    },
+                    {
+                      "key": "logo",
+                      "type": "file",
+                      "description": "Optional: brand logo image file (JPEG/PNG/WebP, max 5 MB). Compressed to WebP and uploaded to S3.",
+                      "disabled": true
                     }
-                  }
+                  ]
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands",
@@ -1420,13 +1452,28 @@
                   }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Smartphones\",\n  \"parentId\": null\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Smartphones",
+                      "type": "text",
+                      "description": "Required: category name"
+                    },
+                    {
+                      "key": "parentId",
+                      "value": "",
+                      "type": "text",
+                      "description": "Optional: parent category ID (omit or leave empty for root)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "icon",
+                      "type": "file",
+                      "description": "Optional: category icon image file (JPEG/PNG/WebP, max 5 MB). Compressed to WebP and uploaded to S3.",
+                      "disabled": true
                     }
-                  }
+                  ]
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories",

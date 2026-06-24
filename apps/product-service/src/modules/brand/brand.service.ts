@@ -26,7 +26,7 @@ export class BrandService {
   // Create
   // ─────────────────────────────────────────────────────────────────────────
 
-  async create(dto: CreateBrandDto) {
+  async create(dto: CreateBrandDto, id?: string) {
     const slug = generateSlug(dto.name);
 
     const existing = await this.prisma.brand.findFirst({
@@ -38,6 +38,7 @@ export class BrandService {
 
     return this.prisma.brand.create({
       data: {
+        id,
         name: dto.name,
         slug,
         description: dto.description,

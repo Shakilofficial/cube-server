@@ -24,6 +24,7 @@ import {
   UserRole,
 } from '@cube/common';
 import { CategoryService } from './category.service';
+import { randomUUID } from 'crypto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
@@ -59,8 +60,40 @@ export class CategoryController {
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Category created successfully')
-  create(@Body() dto: CreateCategoryDto) {
-    return this.categoryService.create(dto);
+  @UseInterceptors(
+    FileInterceptor(
+      'icon',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  async create(
+    @Body() dto: CreateCategoryDto,
+    @UploadedFile() iconFile?: Express.Multer.File,
+  ) {
+    const id = randomUUID();
+    let iconUrl: string | undefined;
+
+    if (iconFile) {
+      const uploaded = await this.storageService.upload(iconFile.buffer, {
+        folder: `categories/${id}`,
+        originalName: iconFile.originalname,
+        mimeType: iconFile.mimetype,
+        imagePreset: 'image',
+        metadata: { categoryId: id },
+      });
+      iconUrl = uploaded.url;
+    }
+
+    return this.categoryService.create(
+      {
+        ...dto,
+        iconUrl,
+      },
+      id,
+    );
   }
 
   /**

@@ -25,6 +25,7 @@ import {
   UserRole,
 } from '@cube/common';
 import { BrandService } from './brand.service';
+import { randomUUID } from 'crypto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 
 @Controller('brands')
@@ -64,8 +65,40 @@ export class BrandController {
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ResponseMessage('Brand created successfully')
-  create(@Body() dto: CreateBrandDto) {
-    return this.brandService.create(dto);
+  @UseInterceptors(
+    FileInterceptor(
+      'logo',
+      multerConfig({
+        allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
+        sizeCategory: 'image',
+      }),
+    ),
+  )
+  async create(
+    @Body() dto: CreateBrandDto,
+    @UploadedFile() logoFile?: Express.Multer.File,
+  ) {
+    const id = randomUUID();
+    let logoUrl: string | undefined;
+
+    if (logoFile) {
+      const uploaded = await this.storageService.upload(logoFile.buffer, {
+        folder: `brands/${id}`,
+        originalName: logoFile.originalname,
+        mimeType: logoFile.mimetype,
+        imagePreset: 'image',
+        metadata: { brandId: id },
+      });
+      logoUrl = uploaded.url;
+    }
+
+    return this.brandService.create(
+      {
+        ...dto,
+        logoUrl,
+      },
+      id,
+    );
   }
 
   /**

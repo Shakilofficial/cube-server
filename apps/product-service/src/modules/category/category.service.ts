@@ -25,7 +25,7 @@ export class CategoryService {
   // Create
   // ─────────────────────────────────────────────────────────────────────────
 
-  async create(dto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto, id?: string) {
     const slug = generateSlug(dto.name);
 
     const existing = await this.prisma.category.findUnique({ where: { slug } });
@@ -46,6 +46,7 @@ export class CategoryService {
 
     return this.prisma.category.create({
       data: {
+        id,
         name: dto.name,
         slug,
         parentId: dto.parentId ?? null,
