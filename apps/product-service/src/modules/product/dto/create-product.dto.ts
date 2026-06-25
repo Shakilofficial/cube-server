@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsObject,
@@ -7,8 +7,8 @@ import {
   IsString,
   IsUUID,
   MaxLength,
-  MinLength
-} from 'class-validator';
+  MinLength,
+} from "class-validator";
 
 export class CreateProductDto {
   @IsOptional()
@@ -36,7 +36,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID("4", { each: true })
   categoryIds?: string[];
 
   @IsOptional()

@@ -1,12 +1,12 @@
-import { PrismaService } from '../../core/prisma/prisma.service';
+import { PrismaService } from "../../core/prisma/prisma.service";
 import {
   ForbiddenException,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { createHash } from 'crypto';
-import { BlacklistService } from './blacklist.service';
-import { TokenService, RefreshTokenPayload } from './token.service';
+} from "@nestjs/common";
+import { createHash } from "crypto";
+import { BlacklistService } from "./blacklist.service";
+import { TokenService, RefreshTokenPayload } from "./token.service";
 
 @Injectable()
 export class SessionService {
@@ -21,12 +21,12 @@ export class SessionService {
     try {
       payload = this.tokenService.verifyRefreshToken(refreshTokenRaw);
     } catch {
-      throw new UnauthorizedException('Invalid or expired refresh token.');
+      throw new UnauthorizedException("Invalid or expired refresh token.");
     }
 
-    const tokenHash = createHash('sha256')
+    const tokenHash = createHash("sha256")
       .update(refreshTokenRaw)
-      .digest('hex');
+      .digest("hex");
 
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
@@ -40,16 +40,16 @@ export class SessionService {
         data: { revokedAt: new Date() },
       });
       throw new ForbiddenException(
-        'Refresh token reuse detected. All sessions revoked.',
+        "Refresh token reuse detected. All sessions revoked.",
       );
     }
 
     if (stored.revokedAt) {
-      throw new UnauthorizedException('Refresh token has been revoked.');
+      throw new UnauthorizedException("Refresh token has been revoked.");
     }
 
     if (stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token has expired.');
+      throw new UnauthorizedException("Refresh token has expired.");
     }
 
     // Revoke used token and issue new one (rotation)
@@ -58,8 +58,15 @@ export class SessionService {
       data: { revokedAt: new Date() },
     });
 
-    const { token: newRefreshToken, hash: newHash, expiresAt } =
-      this.tokenService.issueRefreshToken(stored.userId, stored.family, stored.user.role);
+    const {
+      token: newRefreshToken,
+      hash: newHash,
+      expiresAt,
+    } = this.tokenService.issueRefreshToken(
+      stored.userId,
+      stored.family,
+      stored.user.role,
+    );
 
     await this.prisma.refreshToken.create({
       data: {
@@ -74,20 +81,20 @@ export class SessionService {
     return {
       accessToken: this.tokenService.issueAccessToken({
         sub: user.id,
-        email: user.email || '',
+        email: user.email || "",
         status: user.status,
         role: user.role,
       }),
       refreshToken: newRefreshToken,
-      tokenType: 'JWT',
+      tokenType: "JWT",
       expiresIn: 900,
     };
   }
 
   async logout(refreshTokenRaw: string, accessToken?: string) {
-    const tokenHash = createHash('sha256')
+    const tokenHash = createHash("sha256")
       .update(refreshTokenRaw)
-      .digest('hex');
+      .digest("hex");
 
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
@@ -116,6 +123,6 @@ export class SessionService {
       }
     }
 
-    return { message: 'Logged out successfully.' };
+    return { message: "Logged out successfully." };
   }
 }

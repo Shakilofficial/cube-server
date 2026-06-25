@@ -13,21 +13,21 @@ import {
   UseGuards,
   UseInterceptors,
   Version,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { IMAGE_MIME_TYPES, StorageService, multerConfig } from '@cube/storage';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { IMAGE_MIME_TYPES, StorageService, multerConfig } from "@cube/storage";
 import {
   JwtAuthGuard,
   ResponseMessage,
   Roles,
   RolesGuard,
   UserRole,
-} from '@cube/common';
-import { CategoryService } from './category.service';
-import { randomUUID } from 'crypto';
-import { CreateCategoryDto } from './dto/create-category.dto';
+} from "@cube/common";
+import { CategoryService } from "./category.service";
+import { randomUUID } from "crypto";
+import { CreateCategoryDto } from "./dto/create-category.dto";
 
-@Controller('categories')
+@Controller("categories")
 export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
@@ -37,35 +37,35 @@ export class CategoryController {
   // ─── Public ──────────────────────────────────────────────────────────────
 
   @Get()
-  @Version('1')
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Categories retrieved successfully')
+  @ResponseMessage("Categories retrieved successfully")
   findAll() {
     return this.categoryService.findAll();
   }
 
-  @Get(':id')
-  @Version('1')
+  @Get(":id")
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Category retrieved successfully')
-  findOne(@Param('id') id: string) {
+  @ResponseMessage("Category retrieved successfully")
+  findOne(@Param("id") id: string) {
     return this.categoryService.findOne(id);
   }
 
   // ─── Protected ───────────────────────────────────────────────────────────
 
   @Post()
-  @Version('1')
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
-  @ResponseMessage('Category created successfully')
+  @ResponseMessage("Category created successfully")
   @UseInterceptors(
     FileInterceptor(
-      'icon',
+      "icon",
       multerConfig({
         allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
+        sizeCategory: "image",
       }),
     ),
   )
@@ -81,7 +81,7 @@ export class CategoryController {
         folder: `categories/${id}`,
         originalName: iconFile.originalname,
         mimeType: iconFile.mimetype,
-        imagePreset: 'image',
+        imagePreset: "image",
         metadata: { categoryId: id },
       });
       iconUrl = uploaded.url;
@@ -112,26 +112,26 @@ export class CategoryController {
    *
    * Text-only updates work exactly as before with a JSON body.
    */
-  @Patch(':id')
-  @Version('1')
+  @Patch(":id")
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Category updated successfully')
+  @ResponseMessage("Category updated successfully")
   @UseInterceptors(
     FileInterceptor(
-      'icon',
+      "icon",
       multerConfig({
         allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
+        sizeCategory: "image",
       }),
     ),
   )
   async update(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @UploadedFile() iconFile?: Express.Multer.File,
-    @Body('name') name?: string,
-    @Body('parentId') parentId?: string,
+    @Body("name") name?: string,
+    @Body("parentId") parentId?: string,
   ) {
     let iconUrl: string | undefined;
 
@@ -144,7 +144,7 @@ export class CategoryController {
         folder: `categories/${id}`,
         originalName: iconFile.originalname,
         mimeType: iconFile.mimetype,
-        imagePreset: 'image',
+        imagePreset: "image",
         metadata: { categoryId: id },
       });
 
@@ -159,11 +159,12 @@ export class CategoryController {
     // Validate that at least one field is being updated
     if (!name && !parentId && !iconFile) {
       throw new BadRequestException(
-        'At least one field (name, parentId, or icon) must be provided.',
+        "At least one field (name, parentId, or icon) must be provided.",
       );
     }
 
-    const dto: { name?: string; parentId?: string | null; iconUrl?: string } = {};
+    const dto: { name?: string; parentId?: string | null; iconUrl?: string } =
+      {};
     if (name) dto.name = name.trim();
     if (parentId !== undefined) dto.parentId = parentId || null;
     if (iconUrl) dto.iconUrl = iconUrl;
@@ -171,14 +172,13 @@ export class CategoryController {
     return this.categoryService.update(id, dto);
   }
 
-  @Delete(':id')
-  @Version('1')
+  @Delete(":id")
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Category deleted successfully')
-  remove(@Param('id') id: string) {
+  @ResponseMessage("Category deleted successfully")
+  remove(@Param("id") id: string) {
     return this.categoryService.remove(id);
   }
 }
-

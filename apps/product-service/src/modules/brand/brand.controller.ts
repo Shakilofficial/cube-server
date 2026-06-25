@@ -14,21 +14,22 @@ import {
   UseGuards,
   UseInterceptors,
   Version,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { IMAGE_MIME_TYPES, StorageService, multerConfig } from '@cube/storage';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { IMAGE_MIME_TYPES, StorageService, multerConfig } from "@cube/storage";
 import {
   JwtAuthGuard,
   ResponseMessage,
   Roles,
   RolesGuard,
   UserRole,
-} from '@cube/common';
-import { BrandService } from './brand.service';
-import { randomUUID } from 'crypto';
-import { CreateBrandDto } from './dto/create-brand.dto';
+} from "@cube/common";
+import { BrandService } from "./brand.service";
+import { randomUUID } from "crypto";
+import { CreateBrandDto } from "./dto/create-brand.dto";
+import { QueryBrandDto } from "./dto/query-brand.dto";
 
-@Controller('brands')
+@Controller("brands")
 export class BrandController {
   constructor(
     private readonly brandService: BrandService,
@@ -38,39 +39,35 @@ export class BrandController {
   // ─── Public ──────────────────────────────────────────────────────────────
 
   @Get()
-  @Version('1')
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Brands retrieved successfully')
-  findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('search') search?: string,
-  ) {
-    return this.brandService.findAll({ page, limit, search });
+  @ResponseMessage("Brands retrieved successfully")
+  findAll(@Query() query: QueryBrandDto) {
+    return this.brandService.findAll(query);
   }
 
-  @Get(':id')
-  @Version('1')
+  @Get(":id")
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Brand retrieved successfully')
-  findOne(@Param('id') id: string) {
+  @ResponseMessage("Brand retrieved successfully")
+  findOne(@Param("id") id: string) {
     return this.brandService.findOne(id);
   }
 
   // ─── Protected ───────────────────────────────────────────────────────────
 
   @Post()
-  @Version('1')
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
-  @ResponseMessage('Brand created successfully')
+  @ResponseMessage("Brand created successfully")
   @UseInterceptors(
     FileInterceptor(
-      'logo',
+      "logo",
       multerConfig({
         allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
+        sizeCategory: "image",
       }),
     ),
   )
@@ -86,7 +83,7 @@ export class BrandController {
         folder: `brands/${id}`,
         originalName: logoFile.originalname,
         mimeType: logoFile.mimetype,
-        imagePreset: 'image',
+        imagePreset: "image",
         metadata: { brandId: id },
       });
       logoUrl = uploaded.url;
@@ -120,29 +117,29 @@ export class BrandController {
    *
    * Text-only updates work exactly as before with a JSON body.
    */
-  @Patch(':id')
-  @Version('1')
+  @Patch(":id")
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Brand updated successfully')
+  @ResponseMessage("Brand updated successfully")
   @UseInterceptors(
     FileInterceptor(
-      'logo',
+      "logo",
       multerConfig({
         allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'image',
+        sizeCategory: "image",
       }),
     ),
   )
   async update(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @UploadedFile() logoFile?: Express.Multer.File,
-    @Body('name') name?: string,
-    @Body('description') description?: string,
-    @Body('website') website?: string,
-    @Body('seoTitle') seoTitle?: string,
-    @Body('seoDesc') seoDesc?: string,
+    @Body("name") name?: string,
+    @Body("description") description?: string,
+    @Body("website") website?: string,
+    @Body("seoTitle") seoTitle?: string,
+    @Body("seoDesc") seoDesc?: string,
   ) {
     let logoUrl: string | undefined;
 
@@ -155,7 +152,7 @@ export class BrandController {
         folder: `brands/${id}`,
         originalName: logoFile.originalname,
         mimeType: logoFile.mimetype,
-        imagePreset: 'image',
+        imagePreset: "image",
         metadata: { brandId: id },
       });
 
@@ -168,9 +165,16 @@ export class BrandController {
     }
 
     // Validate that at least one field is being updated
-    if (!name && !description && !website && !seoTitle && !seoDesc && !logoFile) {
+    if (
+      !name &&
+      !description &&
+      !website &&
+      !seoTitle &&
+      !seoDesc &&
+      !logoFile
+    ) {
       throw new BadRequestException(
-        'At least one field (name, description, website, seoTitle, seoDesc, or logo) must be provided.',
+        "At least one field (name, description, website, seoTitle, seoDesc, or logo) must be provided.",
       );
     }
 
@@ -192,13 +196,13 @@ export class BrandController {
     return this.brandService.update(id, dto);
   }
 
-  @Delete(':id')
-  @Version('1')
+  @Delete(":id")
+  @Version("1")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Brand deleted successfully')
-  remove(@Param('id') id: string) {
+  @ResponseMessage("Brand deleted successfully")
+  remove(@Param("id") id: string) {
     return this.brandService.remove(id);
   }
 }

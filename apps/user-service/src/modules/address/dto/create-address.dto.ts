@@ -4,8 +4,8 @@ import {
   IsEnum,
   IsBoolean,
   MaxLength,
-} from 'class-validator';
-import { AddressType } from '@cube/common';
+} from "class-validator";
+import { AddressType } from "@cube/common";
 
 export class CreateAddressDto {
   @IsEnum(AddressType)

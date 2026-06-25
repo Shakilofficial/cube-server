@@ -9,3 +9,4 @@ CREATE DATABASE shipping_db;
 CREATE DATABASE notification_db;
 CREATE DATABASE support_db;
 CREATE DATABASE admin_db;
+CREATE DATABASE offer_db;

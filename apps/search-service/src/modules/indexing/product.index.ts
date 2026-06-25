@@ -1,6 +1,7 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Client } from '@elastic/elasticsearch';
+import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Client } from "@elastic/elasticsearch";
+import { PRODUCT_INDEX_NAME } from "./utils/indexing.constants";
 
 /** Shape of a product document stored in Elasticsearch (from spec 2.3) */
 export interface ProductDocument {
@@ -20,13 +21,13 @@ export interface ProductDocument {
 
 @Injectable()
 export class ProductIndexService implements OnModuleInit {
-  readonly INDEX = 'products';
+  readonly INDEX = PRODUCT_INDEX_NAME;
   private readonly logger = new Logger(ProductIndexService.name);
   private readonly client: Client;
 
   constructor(private readonly config: ConfigService) {
     const node =
-      this.config.get<string>('ELASTICSEARCH_NODE') || 'http://localhost:9200';
+      this.config.get<string>("ELASTICSEARCH_NODE") || "http://localhost:9200";
     this.client = new Client({ node });
   }
 
@@ -50,23 +51,31 @@ export class ProductIndexService implements OnModuleInit {
         index: this.INDEX,
         mappings: {
           properties: {
-            id:            { type: 'keyword' },
-            sku:           { type: 'keyword' },
-            name:          { type: 'text', analyzer: 'standard' },
-            description:   { type: 'text', analyzer: 'standard' },
-            brandName:     { type: 'text', fields: { keyword: { type: 'keyword' } } },
-            categoryNames: { type: 'text', fields: { keyword: { type: 'keyword' } } },
-            price:         { type: 'float' },
-            status:        { type: 'keyword' },
-            avgRating:     { type: 'float' },
-            reviewCount:   { type: 'integer' },
-            inStock:       { type: 'boolean' },
-            createdAt:     { type: 'date' },
+            id: { type: "keyword" },
+            sku: { type: "keyword" },
+            name: { type: "text", analyzer: "standard" },
+            description: { type: "text", analyzer: "standard" },
+            brandName: {
+              type: "text",
+              fields: { keyword: { type: "keyword" } },
+            },
+            categoryNames: {
+              type: "text",
+              fields: { keyword: { type: "keyword" } },
+            },
+            price: { type: "float" },
+            status: { type: "keyword" },
+            avgRating: { type: "float" },
+            reviewCount: { type: "integer" },
+            inStock: { type: "boolean" },
+            createdAt: { type: "date" },
           },
         },
       });
 
-      this.logger.log(`Elasticsearch index "${this.INDEX}" created successfully.`);
+      this.logger.log(
+        `Elasticsearch index "${this.INDEX}" created successfully.`,
+      );
     } catch (err: any) {
       this.logger.error(
         `Failed to initialize Elasticsearch index "${this.INDEX}": ${err.message}`,

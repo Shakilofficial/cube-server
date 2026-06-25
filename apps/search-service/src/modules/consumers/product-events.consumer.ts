@@ -1,7 +1,10 @@
-import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { PRODUCT_EVENTS } from '@cube/common';
-import { ProductIndexService, ProductDocument } from '../indexing/product.index';
+import { Controller, Logger } from "@nestjs/common";
+import { MessagePattern, Payload } from "@nestjs/microservices";
+import { PRODUCT_EVENTS } from "@cube/common";
+import {
+  ProductIndexService,
+  ProductDocument,
+} from "../indexing/product.index";
 
 /**
  * Consumes product lifecycle events from RabbitMQ and
@@ -33,7 +36,9 @@ export class ProductEventsConsumer {
 
   @MessagePattern(PRODUCT_EVENTS.DELETED)
   async onProductDeleted(@Payload() data: { id: string }) {
-    this.logger.log(`[product.deleted] Removing product from index: ${data.id}`);
+    this.logger.log(
+      `[product.deleted] Removing product from index: ${data.id}`,
+    );
     await this.indexService.delete(data.id);
   }
 }

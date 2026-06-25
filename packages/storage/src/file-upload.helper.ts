@@ -1,13 +1,16 @@
 import {
   UnsupportedMediaTypeException,
   PayloadTooLargeException,
-} from '@nestjs/common';
-import { memoryStorage } from 'multer';
+} from "@nestjs/common";
+import { memoryStorage } from "multer";
 import {
   ALL_ALLOWED_MIME_TYPES,
   AllowedMimeType,
-} from './constants/allowed-mime-types';
-import { FILE_SIZE_LIMITS, FileSizeCategory } from './constants/file-size-limits';
+} from "./constants/allowed-mime-types";
+import {
+  FILE_SIZE_LIMITS,
+  FileSizeCategory,
+} from "./constants/file-size-limits";
 
 /** Options when creating a Multer config */
 export interface FileUploadOptions {
@@ -29,7 +32,7 @@ export interface FileUploadOptions {
 export function multerConfig(options: FileUploadOptions = {}) {
   const {
     allowedMimeTypes = ALL_ALLOWED_MIME_TYPES as unknown as AllowedMimeType[],
-    sizeCategory = 'default',
+    sizeCategory = "default",
   } = options;
 
   const allowedSet = new Set<string>(allowedMimeTypes);
@@ -41,16 +44,12 @@ export function multerConfig(options: FileUploadOptions = {}) {
       fileSize: maxFileSize,
       files: 1,
     },
-    fileFilter: (
-      _req: any,
-      file: any,
-      callback: any,
-    ) => {
+    fileFilter: (_req: any, file: any, callback: any) => {
       if (!allowedSet.has(file.mimetype)) {
         return callback(
           new UnsupportedMediaTypeException(
             `File type "${file.mimetype}" is not supported. ` +
-              `Allowed types: ${[...allowedSet].join(', ')}`,
+              `Allowed types: ${[...allowedSet].join(", ")}`,
           ),
           false,
         );
@@ -67,7 +66,7 @@ export function multerConfig(options: FileUploadOptions = {}) {
 export function assertFileSize(
   buffer: Buffer,
   sizeCategory: FileSizeCategory,
-  label = 'file',
+  label = "file",
 ): void {
   const limit = FILE_SIZE_LIMITS[sizeCategory];
   if (buffer.length > limit) {

@@ -3,19 +3,19 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+} from "@nestjs/websockets";
+import { Server, Socket } from "socket.io";
+import { Logger } from "@nestjs/common";
 
 @WebSocketGateway({
-  cors: { origin: '*' },
-  namespace: '/push',
+  cors: { origin: "*" },
+  namespace: "/push",
 })
 export class PushGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
 
-  private readonly logger = new Logger('PushGateway');
+  private readonly logger = new Logger("PushGateway");
   /** Map userId → Set of socket IDs */
   private userSockets = new Map<string, Set<string>>();
 

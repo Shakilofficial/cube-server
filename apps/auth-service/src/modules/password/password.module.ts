@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
-import { PasswordController } from './password.controller';
-import { PasswordService } from './password.service';
-import { MessagingModule } from '@cube/messaging';
+import { Module } from "@nestjs/common";
+import { PasswordController } from "./password.controller";
+import { PasswordService } from "./password.service";
+import { MessagingModule } from "@cube/messaging";
 
 @Module({
   imports: [MessagingModule],

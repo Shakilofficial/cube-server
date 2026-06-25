@@ -4,13 +4,14 @@ import {
   ConflictException,
   BadRequestException,
   Logger,
-} from '@nestjs/common';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { generateSlug, buildCategoryTree, guardCircularReference } from '../../common/helpers';
-import { StorageService } from '@cube/storage';
-
+} from "@nestjs/common";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { CreateCategoryDto } from "./dto/create-category.dto";
+import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { generateSlug, buildCategoryTree } from "./utils/category.utils";
+import { guardCircularReference } from "./helpers/category.helper";
+import { StorageService } from "@cube/storage";
+import { ProductHelper } from "../product/helpers/product.helper";
 
 @Injectable()
 export class CategoryService {
@@ -19,6 +20,7 @@ export class CategoryService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly productHelper: ProductHelper,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -30,7 +32,7 @@ export class CategoryService {
 
     const existing = await this.prisma.category.findUnique({ where: { slug } });
     if (existing) {
-      throw new ConflictException('A category with this name already exists.');
+      throw new ConflictException("A category with this name already exists.");
     }
 
     let level = 0;
@@ -39,7 +41,9 @@ export class CategoryService {
         where: { id: dto.parentId },
       });
       if (!parent) {
-        throw new NotFoundException(`Parent category ${dto.parentId} not found.`);
+        throw new NotFoundException(
+          `Parent category ${dto.parentId} not found.`,
+        );
       }
       level = parent.level + 1;
     }
@@ -64,7 +68,7 @@ export class CategoryService {
   /** Returns full tree — root categories with their children recursively. */
   async findAll() {
     const all = await this.prisma.category.findMany({
-      orderBy: [{ level: 'asc' }, { name: 'asc' }],
+      orderBy: [{ level: "asc" }, { name: "asc" }],
       include: { _count: { select: { products: true } } },
     });
     return buildCategoryTree(all);
@@ -90,26 +94,31 @@ export class CategoryService {
   // ─────────────────────────────────────────────────────────────────────────
 
   async update(id: string, dto: UpdateCategoryDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
 
     if (dto.parentId !== undefined) {
       if (dto.parentId === id) {
-        throw new BadRequestException('A category cannot be its own parent.');
+        throw new BadRequestException("A category cannot be its own parent.");
       }
       await guardCircularReference(this.prisma, id, dto.parentId);
     }
 
     const data: any = {};
-    if (dto.name) {
+    let nameChanged = false;
+
+    if (dto.name && dto.name !== existing.name) {
       const slug = generateSlug(dto.name);
       const conflict = await this.prisma.category.findFirst({
         where: { slug, NOT: { id } },
       });
       if (conflict) {
-        throw new ConflictException('A category with this name already exists.');
+        throw new ConflictException(
+          "A category with this name already exists.",
+        );
       }
       data.name = dto.name;
       data.slug = slug;
+      nameChanged = true;
     }
 
     if (dto.parentId !== undefined) {
@@ -128,11 +137,17 @@ export class CategoryService {
       data.iconUrl = dto.iconUrl ?? null;
     }
 
-    return this.prisma.category.update({
+    const updated = await this.prisma.category.update({
       where: { id },
       data,
       include: { parent: true },
     });
+
+    if (nameChanged) {
+      await this.productHelper.syncProductsByCategory(id);
+    }
+
+    return updated;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -165,7 +180,6 @@ export class CategoryService {
     }
 
     await this.prisma.category.delete({ where: { id } });
-    return { message: 'Category deleted successfully.' };
+    return { message: "Category deleted successfully." };
   }
-
 }

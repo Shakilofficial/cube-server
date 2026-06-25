@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, Injectable } from "@nestjs/common";
+import { ClientProxy } from "@nestjs/microservices";
 
 @Injectable()
 export class EmailPublisher {
-  constructor(@Inject('SMS_SERVICE') private readonly client: ClientProxy) {}
+  constructor(@Inject("SMS_SERVICE") private readonly client: ClientProxy) {}
 
   async sendEmail(
     to: string,
@@ -13,7 +13,7 @@ export class EmailPublisher {
     template?: string,
     context?: Record<string, any>,
   ): Promise<void> {
-    this.client.emit('send_email', {
+    this.client.emit("send_email", {
       to,
       subject,
       body,
@@ -31,10 +31,10 @@ export class EmailPublisher {
   ): Promise<void> {
     await this.sendEmail(
       to,
-      'Verify Your Email',
+      "Verify Your Email",
       `Your verification code is ${otpCode}.`,
       undefined,
-      'verify-email',
+      "verify-email",
       { name, otp: otpCode, verifyUrl },
     );
   }
@@ -42,10 +42,10 @@ export class EmailPublisher {
   async sendWelcomeEmail(to: string, name: string): Promise<void> {
     await this.sendEmail(
       to,
-      'Congratulations and Welcome!',
-      'Welcome to Cube! Your account has been successfully created.',
+      "Congratulations and Welcome!",
+      "Welcome to Cube! Your account has been successfully created.",
       undefined,
-      'welcome',
+      "welcome",
       { name },
     );
   }
@@ -57,10 +57,10 @@ export class EmailPublisher {
   ): Promise<void> {
     await this.sendEmail(
       to,
-      'Reset Your Password',
+      "Reset Your Password",
       `Use this link to reset your password: ${resetUrl}`,
       undefined,
-      'password-reset',
+      "password-reset",
       { name, resetUrl },
     );
   }

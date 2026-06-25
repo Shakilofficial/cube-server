@@ -1,11 +1,19 @@
-import { IsEnum, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductStatus } from "../../../../prisma/generated/prisma/enums";
 
 export enum ProductSortBy {
-  CREATED_AT = 'createdAt',
-  PRICE_ASC = 'price_asc',
-  PRICE_DESC = 'price_desc',
-  NAME = 'name',
+  CREATED_AT = "createdAt",
+  PRICE_ASC = "price_asc",
+  PRICE_DESC = "price_desc",
+  NAME = "name",
 }
 
 export class QueryProductDto {
@@ -26,8 +34,8 @@ export class QueryProductDto {
   search?: string;
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 
   @IsOptional()
   @IsUUID()

@@ -1,6 +1,7 @@
-import { IsEnum } from 'class-validator';
+import { IsEnum } from "class-validator";
+import { ReviewStatus } from "../../../../prisma/generated/prisma/enums";
 
 export class ModerateReviewDto {
-  @IsEnum(['APPROVED', 'REJECTED'])
-  status: 'APPROVED' | 'REJECTED';
+  @IsEnum(ReviewStatus)
+  status: ReviewStatus;
 }

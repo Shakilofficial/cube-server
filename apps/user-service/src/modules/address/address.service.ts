@@ -1,23 +1,25 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { CreateAddressDto } from './dto/create-address.dto';
-import { UpdateAddressDto } from './dto/update-address.dto';
-
-const MAX_ADDRESSES_PER_USER = 3;
+} from "@nestjs/common";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { CreateAddressDto } from "./dto/create-address.dto";
+import { UpdateAddressDto } from "./dto/update-address.dto";
+import { AddressHelper } from "./helpers/address.helper";
+import { MAX_ADDRESSES_PER_USER } from "./utils/address.utils";
 
 @Injectable()
 export class AddressService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly addressHelper: AddressHelper,
+  ) {}
 
   async findAll(userId: string) {
     return this.prisma.address.findMany({
       where: { userId },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
     });
   }
 
@@ -30,9 +32,13 @@ export class AddressService {
     }
 
     // Ensure user profile exists
-    const profile = await this.prisma.userProfile.findUnique({ where: { id: userId } });
+    const profile = await this.prisma.userProfile.findUnique({
+      where: { id: userId },
+    });
     if (!profile) {
-      throw new NotFoundException('User profile not found. Please complete your profile first.');
+      throw new NotFoundException(
+        "User profile not found. Please complete your profile first.",
+      );
     }
 
     // If setting as default, unset others
@@ -52,12 +58,11 @@ export class AddressService {
   }
 
   async update(userId: string, addressId: string, dto: UpdateAddressDto) {
-    const address = await this.prisma.address.findUnique({
-      where: { id: addressId },
-    });
-
-    if (!address) throw new NotFoundException('Address not found.');
-    if (address.userId !== userId) throw new ForbiddenException('Access denied.');
+    await this.addressHelper.findAndValidateAddress(
+      this.prisma,
+      addressId,
+      userId,
+    );
 
     // If setting as default, unset others
     if (dto.isDefault) {
@@ -74,14 +79,13 @@ export class AddressService {
   }
 
   async remove(userId: string, addressId: string) {
-    const address = await this.prisma.address.findUnique({
-      where: { id: addressId },
-    });
-
-    if (!address) throw new NotFoundException('Address not found.');
-    if (address.userId !== userId) throw new ForbiddenException('Access denied.');
+    await this.addressHelper.findAndValidateAddress(
+      this.prisma,
+      addressId,
+      userId,
+    );
 
     await this.prisma.address.delete({ where: { id: addressId } });
-    return { message: 'Address deleted successfully.' };
+    return { message: "Address deleted successfully." };
   }
 }

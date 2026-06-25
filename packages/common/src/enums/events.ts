@@ -1,19 +1,19 @@
 export const PRODUCT_EVENTS = {
-  CREATED: 'product.created',
-  UPDATED: 'product.updated',
-  DELETED: 'product.deleted',
-  STATUS_CHANGED: 'product.status_changed',
+  CREATED: "product.created",
+  UPDATED: "product.updated",
+  DELETED: "product.deleted",
+  STATUS_CHANGED: "product.status_changed",
 } as const;
 
 export const ORDER_EVENTS = {
-  CREATED: 'order.created',
-  STATUS_CHANGED: 'order.status_changed',
-  CANCELLED: 'order.cancelled',
+  CREATED: "order.created",
+  STATUS_CHANGED: "order.status_changed",
+  CANCELLED: "order.cancelled",
 } as const;
 
 export const INVENTORY_EVENTS = {
-  RESERVED: 'inventory.reserved',
-  CONFIRMED: 'inventory.confirmed',
-  RELEASED: 'inventory.released',
-  LOW_STOCK: 'inventory.low_stock',
+  RESERVED: "inventory.reserved",
+  CONFIRMED: "inventory.confirmed",
+  RELEASED: "inventory.released",
+  LOW_STOCK: "inventory.low_stock",
 } as const;

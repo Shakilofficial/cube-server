@@ -1,17 +1,17 @@
+import { paginationHelper } from "@cube/common";
 import {
-  Injectable,
-  NotFoundException,
   ConflictException,
   ForbiddenException,
+  Injectable,
   Logger,
-  Inject,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { PRODUCT_EVENTS, paginationHelper } from '@cube/common';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { ModerateReviewDto } from './dto/moderate-review.dto';
-import { ProductService } from '../product/product.service';
+  NotFoundException,
+} from "@nestjs/common";
+import { ReviewStatus } from "../../../prisma/generated/prisma/enums";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { CreateReviewDto } from "./dto/create-review.dto";
+import { ModerateReviewDto } from "./dto/moderate-review.dto";
+import { ReviewHelper } from "./helpers/review.helper";
+import { buildWhereClause } from "./utils/review.utils";
 
 @Injectable()
 export class ReviewService {
@@ -19,8 +19,7 @@ export class ReviewService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly productService: ProductService,
-    @Inject('PRODUCT_EVENTS_QUEUE') private readonly eventClient: ClientProxy,
+    private readonly reviewHelper: ReviewHelper,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -32,9 +31,12 @@ export class ReviewService {
     const product = await this.prisma.product.findUnique({
       where: { id: dto.productId },
     });
-    if (!product) throw new NotFoundException(`Product ${dto.productId} not found.`);
-    if (product.status !== 'ACTIVE') {
-      throw new ForbiddenException('Reviews can only be submitted for active products.');
+    if (!product)
+      throw new NotFoundException(`Product ${dto.productId} not found.`);
+    if (product.status !== "ACTIVE") {
+      throw new ForbiddenException(
+        "Reviews can only be submitted for active products.",
+      );
     }
 
     // One review per user per product (enforced by DB unique index too)
@@ -42,7 +44,7 @@ export class ReviewService {
       where: { productId_userId: { productId: dto.productId, userId } },
     });
     if (existing) {
-      throw new ConflictException('You have already reviewed this product.');
+      throw new ConflictException("You have already reviewed this product.");
     }
 
     const review = await this.prisma.productReview.create({
@@ -51,7 +53,7 @@ export class ReviewService {
         userId,
         rating: dto.rating,
         comment: dto.comment,
-        status: 'PENDING',
+        status: "PENDING",
       },
     });
 
@@ -64,14 +66,12 @@ export class ReviewService {
 
   async findAll(options: {
     productId?: string;
-    status?: string;
+    status?: ReviewStatus;
     page?: number;
     limit?: number;
   }) {
     const { page, limit, skip } = paginationHelper.calculatePagination(options);
-    const where: any = {};
-    if (options.productId) where.productId = options.productId;
-    if (options.status) where.status = options.status;
+    const where = buildWhereClause(options);
 
     const [total, data] = await this.prisma.$transaction([
       this.prisma.productReview.count({ where }),
@@ -79,7 +79,7 @@ export class ReviewService {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: { _count: { select: { votes: true } } },
       }),
     ]);
@@ -109,7 +109,7 @@ export class ReviewService {
     });
 
     // Recompute avg rating and publish updated product event
-    await this.syncProductRating(review.productId);
+    await this.reviewHelper.syncProductRating(review.productId);
 
     return review;
   }
@@ -129,13 +129,15 @@ export class ReviewService {
     });
 
     // Update the denormalised helpfulVotes count
-    const count = await this.prisma.reviewHelpfulVote.count({ where: { reviewId } });
+    const count = await this.prisma.reviewHelpfulVote.count({
+      where: { reviewId },
+    });
     await this.prisma.productReview.update({
       where: { id: reviewId },
       data: { helpfulVotes: count },
     });
 
-    return { message: 'Vote recorded.' };
+    return { message: "Vote recorded." };
   }
 
   async removeVote(reviewId: string, userId: string) {
@@ -143,38 +145,16 @@ export class ReviewService {
 
     await this.prisma.reviewHelpfulVote
       .delete({ where: { userId_reviewId: { userId, reviewId } } })
-      .catch(() => {}); // Silently ignore if vote doesn't exist
+      .catch(() => {});
 
-    const count = await this.prisma.reviewHelpfulVote.count({ where: { reviewId } });
+    const count = await this.prisma.reviewHelpfulVote.count({
+      where: { reviewId },
+    });
     await this.prisma.productReview.update({
       where: { id: reviewId },
       data: { helpfulVotes: count },
     });
 
-    return { message: 'Vote removed.' };
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────────────────
-
-  private async syncProductRating(productId: string): Promise<void> {
-    try {
-      const product = await this.prisma.product.findUnique({
-        where: { id: productId },
-        include: {
-          brand: true,
-          images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
-          categories: { include: { category: true } },
-          _count: { select: { reviews: true } },
-        },
-      });
-      if (!product) return;
-
-      const doc = await this.productService.buildProductDocument(product);
-      this.eventClient.emit(PRODUCT_EVENTS.UPDATED, doc);
-    } catch (err: any) {
-      this.logger.warn(`Failed to sync product rating: ${err.message}`);
-    }
+    return { message: "Vote removed." };
   }
 }

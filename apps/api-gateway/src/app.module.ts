@@ -1,7 +1,7 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from '@cube/logger';
-import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { LoggerModule } from "@cube/logger";
+import { CorrelationIdMiddleware } from "./middleware/correlation-id.middleware";
 
 @Module({
   imports: [
@@ -13,8 +13,6 @@ import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware'
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CorrelationIdMiddleware)
-      .forRoutes('*');
+    consumer.apply(CorrelationIdMiddleware).forRoutes("*");
   }
 }

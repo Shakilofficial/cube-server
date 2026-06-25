@@ -3,11 +3,12 @@ import {
   NotFoundException,
   ConflictException,
   Logger,
-} from '@nestjs/common';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { UpdateProfileDto } from './dto/update-profile.dto';
-import { ConfigService } from '@nestjs/config';
-import { SearchService } from '../../core/search/search.service';
+} from "@nestjs/common";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { ConfigService } from "@nestjs/config";
+import { SearchService } from "../../core/search/search.service";
+import { UserAuthHelper } from "./helpers/user-auth.helper";
 
 @Injectable()
 export class ProfileService {
@@ -17,6 +18,7 @@ export class ProfileService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly searchService: SearchService,
+    private readonly userAuthHelper: UserAuthHelper,
   ) {}
 
   async getProfile(userId: string, email?: string, authHeader?: string) {
@@ -26,12 +28,13 @@ export class ProfileService {
     });
 
     if (!profile) {
-      const emailValue = email && email.trim() !== '' ? email : `${userId}@placeholder.com`;
+      const emailValue =
+        email && email.trim() !== "" ? email : `${userId}@placeholder.com`;
       profile = await this.prisma.userProfile.create({
         data: {
           id: userId,
           email: emailValue,
-          name: emailValue.split('@')[0],
+          name: emailValue.split("@")[0],
           preferences: {
             create: {},
           },
@@ -45,7 +48,12 @@ export class ProfileService {
     return profile;
   }
 
-  async upsertProfile(userId: string, email: string, data: UpdateProfileDto & { name?: string }, authHeader?: string) {
+  async upsertProfile(
+    userId: string,
+    email: string,
+    data: UpdateProfileDto & { name?: string },
+    authHeader?: string,
+  ) {
     const profile = await this.prisma.userProfile.upsert({
       where: { id: userId },
       update: {
@@ -56,7 +64,7 @@ export class ProfileService {
       create: {
         id: userId,
         email,
-        name: data.name ?? 'User',
+        name: data.name ?? "User",
         phone: data.phone,
         avatarUrl: data.avatarUrl,
       },
@@ -66,7 +74,11 @@ export class ProfileService {
     return profile;
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDto, authHeader?: string) {
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+    authHeader?: string,
+  ) {
     let profile = await this.prisma.userProfile.findUnique({
       where: { id: userId },
     });
@@ -78,7 +90,7 @@ export class ProfileService {
         data: {
           id: userId,
           email: emailValue,
-          name: dto.name ?? emailValue.split('@')[0],
+          name: dto.name ?? emailValue.split("@")[0],
           phone: dto.phone,
           avatarUrl: dto.avatarUrl,
           preferences: {
@@ -101,7 +113,13 @@ export class ProfileService {
     return updatedProfile;
   }
 
-  async createUserProfile(userId: string, email: string, name: string, phone?: string, authHeader?: string) {
+  async createUserProfile(
+    userId: string,
+    email: string,
+    name: string,
+    phone?: string,
+    authHeader?: string,
+  ) {
     const profile = await this.prisma.userProfile.create({
       data: {
         id: userId,
@@ -125,22 +143,13 @@ export class ProfileService {
     try {
       let account = authUser;
       if (!account) {
-        const authServiceUrl = this.config.get<string>('AUTH_SERVICE_URL') || 'http://localhost:3001';
-        const headers: any = { 'Content-Type': 'application/json' };
-        if (authHeader) {
-          headers.Authorization = authHeader;
-        }
-        const response = await fetch(`${authServiceUrl}/v1/auth/users/${userId}`, {
-          headers,
-        });
-        if (response.ok) {
-          const resJson = (await response.json()) as any;
-          account = resJson.data || resJson;
-        }
+        account = await this.userAuthHelper.getUser(userId, authHeader);
       }
 
       if (!account) {
-        this.logger.warn(`Could not sync user ${userId} to Elasticsearch: Account details not found in auth-service.`);
+        this.logger.warn(
+          `Could not sync user ${userId} to Elasticsearch: Account details not found in auth-service.`,
+        );
         return;
       }
 
@@ -149,7 +158,9 @@ export class ProfileService {
       });
 
       if (!profile) {
-        this.logger.warn(`Could not sync user ${userId} to Elasticsearch: Local profile details not found.`);
+        this.logger.warn(
+          `Could not sync user ${userId} to Elasticsearch: Local profile details not found.`,
+        );
         return;
       }
 
@@ -165,30 +176,21 @@ export class ProfileService {
       });
       await this.searchService.refreshIndex();
     } catch (error: any) {
-      this.logger.error(`Error syncing user ${userId} to Elasticsearch:`, error.message || error);
+      this.logger.error(
+        `Error syncing user ${userId} to Elasticsearch:`,
+        error.message || error,
+      );
     }
   }
 
   async syncAllToElasticSearch(authHeader?: string) {
     try {
-      const authServiceUrl = this.config.get<string>('AUTH_SERVICE_URL') || 'http://localhost:3001';
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (authHeader) {
-        headers.Authorization = authHeader;
-      }
-      // Fetch all user accounts (pass a high limit for complete sync)
-      const response = await fetch(`${authServiceUrl}/v1/auth/users?limit=2000`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch users from auth-service');
-      }
-
-      const resJson = (await response.json()) as any;
-      const accounts = resJson.data || [];
+      const accounts = await this.userAuthHelper.getUsers(authHeader);
 
       const profiles = await this.prisma.userProfile.findMany();
-      const profileMap = new Map<string, any>(profiles.map((p: any) => [p.id, p]));
+      const profileMap = new Map<string, any>(
+        profiles.map((p: any) => [p.id, p]),
+      );
 
       let count = 0;
       for (const account of accounts) {
@@ -212,7 +214,7 @@ export class ProfileService {
             data: {
               id: account.id,
               email: emailValue,
-              name: emailValue.split('@')[0],
+              name: emailValue.split("@")[0],
               preferences: {
                 create: {},
               },
@@ -234,7 +236,10 @@ export class ProfileService {
       await this.searchService.refreshIndex();
       return { count };
     } catch (error: any) {
-      this.logger.error('Error syncing all users to Elasticsearch:', error.message || error);
+      this.logger.error(
+        "Error syncing all users to Elasticsearch:",
+        error.message || error,
+      );
       throw error;
     }
   }

@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Client } from '@elastic/elasticsearch';
+import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Client } from "@elastic/elasticsearch";
 
 export interface UserDoc {
   id: string;
@@ -30,26 +30,26 @@ export class SearchService implements OnModuleInit {
 
   constructor(private readonly config: ConfigService) {
     const node =
-      this.config.get<string>('ELASTICSEARCH_NODE') || 'http://localhost:9200';
+      this.config.get<string>("ELASTICSEARCH_NODE") || "http://localhost:9200";
     this.client = new Client({ node });
   }
 
   async onModuleInit() {
     try {
-      const exists = await this.client.indices.exists({ index: 'users' });
+      const exists = await this.client.indices.exists({ index: "users" });
       if (!exists) {
         await this.client.indices.create({
-          index: 'users',
+          index: "users",
           mappings: {
             properties: {
-              id: { type: 'keyword' },
-              name: { type: 'text', analyzer: 'standard' },
-              email: { type: 'keyword' },
-              phone: { type: 'keyword' },
-              role: { type: 'keyword' },
-              status: { type: 'keyword' },
-              avatarUrl: { type: 'keyword' },
-              createdAt: { type: 'date' },
+              id: { type: "keyword" },
+              name: { type: "text", analyzer: "standard" },
+              email: { type: "keyword" },
+              phone: { type: "keyword" },
+              role: { type: "keyword" },
+              status: { type: "keyword" },
+              avatarUrl: { type: "keyword" },
+              createdAt: { type: "date" },
             },
           },
         });
@@ -68,7 +68,7 @@ export class SearchService implements OnModuleInit {
   async indexUser(user: UserDoc) {
     try {
       await this.client.index({
-        index: 'users',
+        index: "users",
         id: user.id,
         document: {
           id: user.id,
@@ -92,7 +92,7 @@ export class SearchService implements OnModuleInit {
 
   async deleteUser(userId: string) {
     try {
-      await this.client.delete({ index: 'users', id: userId });
+      await this.client.delete({ index: "users", id: userId });
       this.logger.log(`Deleted user document: ${userId}`);
     } catch (error: any) {
       if (error.meta?.statusCode !== 404) {
@@ -106,10 +106,13 @@ export class SearchService implements OnModuleInit {
 
   async refreshIndex() {
     try {
-      await this.client.indices.refresh({ index: 'users' });
-      this.logger.log('Refreshed index: users');
+      await this.client.indices.refresh({ index: "users" });
+      this.logger.log("Refreshed index: users");
     } catch (error: any) {
-      this.logger.error('Failed to refresh index "users":', error.message || error);
+      this.logger.error(
+        'Failed to refresh index "users":',
+        error.message || error,
+      );
     }
   }
 
@@ -136,13 +139,21 @@ export class SearchService implements OnModuleInit {
                 name: { value: `*${params.search.toLowerCase()}*`, boost: 2.0 },
               },
             },
-            { wildcard: { email: { value: `*${params.search.toLowerCase()}*` } } },
-            { wildcard: { phone: { value: `*${params.search.toLowerCase()}*` } } },
+            {
+              wildcard: {
+                email: { value: `*${params.search.toLowerCase()}*` },
+              },
+            },
+            {
+              wildcard: {
+                phone: { value: `*${params.search.toLowerCase()}*` },
+              },
+            },
             {
               multi_match: {
                 query: params.search,
-                fields: ['name^2', 'email', 'phone'],
-                fuzziness: 'AUTO',
+                fields: ["name^2", "email", "phone"],
+                fuzziness: "AUTO",
               },
             },
           ],
@@ -157,7 +168,7 @@ export class SearchService implements OnModuleInit {
 
     try {
       const response = await this.client.search<UserDoc>({
-        index: 'users',
+        index: "users",
         from,
         size,
         query: { bool: { must, filter } },
@@ -166,7 +177,7 @@ export class SearchService implements OnModuleInit {
 
       const totalValue = response.hits.total;
       const total =
-        typeof totalValue === 'number'
+        typeof totalValue === "number"
           ? totalValue
           : (totalValue as any)?.value || 0;
       const data = response.hits.hits.map((hit) => hit._source as UserDoc);
@@ -176,7 +187,7 @@ export class SearchService implements OnModuleInit {
         data,
       };
     } catch (error: any) {
-      this.logger.error('Elasticsearch search error:', error.message || error);
+      this.logger.error("Elasticsearch search error:", error.message || error);
       return {
         meta: { page: params.page, limit: params.limit, total: 0 },
         data: [],

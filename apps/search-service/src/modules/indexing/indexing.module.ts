@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { ProductIndexService } from './product.index';
+import { Module } from "@nestjs/common";
+import { ProductIndexService } from "./product.index";
 
 @Module({
   providers: [ProductIndexService],

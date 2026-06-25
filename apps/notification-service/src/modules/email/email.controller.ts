@@ -1,6 +1,6 @@
-import { Controller } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
-import { EmailService } from './email.service';
+import { Controller } from "@nestjs/common";
+import { EventPattern, Payload } from "@nestjs/microservices";
+import { EmailService } from "./email.service";
 
 interface EmailPayload {
   to: string;
@@ -15,7 +15,7 @@ interface EmailPayload {
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  @EventPattern('send_email')
+  @EventPattern("send_email")
   async handleSendEmail(@Payload() data: EmailPayload) {
     await this.emailService.sendEmail(data);
   }

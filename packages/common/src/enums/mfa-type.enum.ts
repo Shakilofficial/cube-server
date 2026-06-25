@@ -1,4 +1,4 @@
 export enum MfaType {
-  TOTP = 'TOTP',
-  SMS = 'SMS',
+  TOTP = "TOTP",
+  SMS = "SMS",
 }

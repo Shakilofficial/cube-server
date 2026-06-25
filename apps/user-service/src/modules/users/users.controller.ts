@@ -14,12 +14,19 @@ import {
   ConflictException,
   NotFoundException,
   InternalServerErrorException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ProfileService } from '../profile/profile.service';
-import { SearchService } from '../../core/search/search.service';
-import { CreateUserDto } from '../profile/dto/create-user.dto';
-import { JwtAuthGuard, RolesGuard, Roles, UserRole, ResponseMessage } from '@cube/common';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { ProfileService } from "../profile/profile.service";
+import { SearchService } from "../../core/search/search.service";
+import { CreateUserDto } from "../profile/dto/create-user.dto";
+import { UserAuthHelper } from "../profile/helpers/user-auth.helper";
+import {
+  JwtAuthGuard,
+  RolesGuard,
+  Roles,
+  UserRole,
+  ResponseMessage,
+} from "@cube/common";
 
 /**
  * UsersController handles all admin-facing user management routes.
@@ -30,13 +37,14 @@ import { JwtAuthGuard, RolesGuard, Roles, UserRole, ResponseMessage } from '@cub
  *
  * All routes require authentication. Role restrictions are enforced per-route.
  */
-@Controller('users')
+@Controller("users")
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly profileService: ProfileService,
     private readonly searchService: SearchService,
     private readonly config: ConfigService,
+    private readonly userAuthHelper: UserAuthHelper,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -44,19 +52,19 @@ export class UsersController {
   // ─────────────────────────────────────────────────────────────────────────
 
   @Get()
-  @Version('1')
+  @Version("1")
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SUPPORT)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Users retrieved successfully')
+  @ResponseMessage("Users retrieved successfully")
   async getAllUsers(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('sortBy') sortBy?: string,
-    @Query('sortOrder') sortOrder?: string,
-    @Query('role') role?: string,
-    @Query('status') status?: string,
-    @Query('search') search?: string,
+    @Query("page") page?: number,
+    @Query("limit") limit?: number,
+    @Query("sortBy") sortBy?: string,
+    @Query("sortOrder") sortOrder?: string,
+    @Query("role") role?: string,
+    @Query("status") status?: string,
+    @Query("search") search?: string,
   ) {
     return this.searchService.searchUsers({
       search,
@@ -64,8 +72,8 @@ export class UsersController {
       status,
       page: Number(page) || 1,
       limit: Number(limit) || 10,
-      sortBy: sortBy || 'createdAt',
-      sortOrder: sortOrder || 'desc',
+      sortBy: sortBy || "createdAt",
+      sortOrder: sortOrder || "desc",
     });
   }
 
@@ -73,40 +81,27 @@ export class UsersController {
   // Single User Detail
   // ─────────────────────────────────────────────────────────────────────────
 
-  @Get(':id')
-  @Version('1')
+  @Get(":id")
+  @Version("1")
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SUPPORT)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User retrieved successfully')
+  @ResponseMessage("User retrieved successfully")
   async getUserById(
-    @Param('id') id: string,
-    @Headers('authorization') authHeader: string,
+    @Param("id") id: string,
+    @Headers("authorization") authHeader: string,
   ) {
-    const authServiceUrl =
-      this.config.get<string>('AUTH_SERVICE_URL') || 'http://localhost:3001';
-
-    let account: any;
-    try {
-      const response = await fetch(`${authServiceUrl}/v1/auth/users/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: authHeader,
-        },
-      });
-      if (response.ok) {
-        const resJson = (await response.json()) as any;
-        account = resJson.data || resJson;
-      }
-    } catch (err: any) {
-      console.error('Failed to query user credentials:', err.message || err);
-    }
+    const account = await this.userAuthHelper.getUser(id, authHeader);
 
     if (!account) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
 
-    const profile = await this.profileService.getProfile(id, undefined, authHeader);
+    const profile = await this.profileService.getProfile(
+      id,
+      undefined,
+      authHeader,
+    );
 
     return {
       id: account.id,
@@ -114,7 +109,8 @@ export class UsersController {
       phone: account.phone,
       role: account.role,
       status: account.status,
-      name: profile?.name || (account.email ? account.email.split('@')[0] : 'User'),
+      name:
+        profile?.name || (account.email ? account.email.split("@")[0] : "User"),
       avatarUrl: profile?.avatarUrl || null,
       createdAt: account.createdAt,
       updatedAt: account.updatedAt,
@@ -126,60 +122,35 @@ export class UsersController {
   // ─────────────────────────────────────────────────────────────────────────
 
   @Post()
-  @Version('1')
+  @Version("1")
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  @ResponseMessage('User created successfully')
+  @ResponseMessage("User created successfully")
   async createUser(
     @Body() dto: CreateUserDto,
-    @Headers('authorization') authHeader: string,
+    @Headers("authorization") authHeader: string,
   ) {
     if (!dto.email && !dto.phone) {
-      throw new BadRequestException('Either email or phone must be provided.');
+      throw new BadRequestException("Either email or phone must be provided.");
     }
     if (dto.role !== UserRole.MANAGER && dto.role !== UserRole.SUPPORT) {
       throw new BadRequestException(
-        'Admin can only create MANAGER or SUPPORT role users.',
+        "Admin can only create MANAGER or SUPPORT role users.",
       );
     }
 
-    const authServiceUrl =
-      this.config.get<string>('AUTH_SERVICE_URL') || 'http://localhost:3001';
-
     try {
-      const response = await fetch(`${authServiceUrl}/v1/auth/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: authHeader,
-        },
-        body: JSON.stringify({
+      const actualAuthUser = await this.userAuthHelper.createUser(
+        {
           email: dto.email,
           phone: dto.phone,
           password: dto.password,
           role: dto.role,
           name: dto.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const errData = (await response.json().catch(() => ({}))) as any;
-        if (response.status === 409) {
-          throw new ConflictException(
-            errData.message || 'User already exists in authentication database.',
-          );
-        }
-        if (response.status === 400) {
-          throw new BadRequestException(errData.message || 'Invalid input.');
-        }
-        throw new InternalServerErrorException(
-          errData.message || 'Failed to create user credentials.',
-        );
-      }
-
-      const createdAuthUser = (await response.json()) as any;
-      const actualAuthUser = createdAuthUser.data || createdAuthUser;
+        },
+        authHeader,
+      );
 
       const emailPlaceholder =
         dto.email || `${actualAuthUser.id}@placeholder.com`;
@@ -203,7 +174,7 @@ export class UsersController {
         email: profile.email,
         phone: profile.phone,
         role: actualAuthUser.role,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         createdAt: profile.createdAt,
       };
     } catch (err: any) {
@@ -215,7 +186,7 @@ export class UsersController {
         throw err;
       }
       throw new InternalServerErrorException(
-        err.message || 'An error occurred during user provisioning.',
+        err.message || "An error occurred during user provisioning.",
       );
     }
   }
@@ -224,16 +195,16 @@ export class UsersController {
   // Admin: Reindex Elasticsearch
   // ─────────────────────────────────────────────────────────────────────────
 
-  @Post('reindex')
-  @Version('1')
+  @Post("reindex")
+  @Version("1")
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Elasticsearch indexing completed successfully')
-  async reindexAll(@Headers('authorization') authHeader: string) {
+  @ResponseMessage("Elasticsearch indexing completed successfully")
+  async reindexAll(@Headers("authorization") authHeader: string) {
     const result = await this.profileService.syncAllToElasticSearch(authHeader);
     return {
-      message: 'Elasticsearch user indexing completed successfully.',
+      message: "Elasticsearch user indexing completed successfully.",
       ...result,
     };
   }

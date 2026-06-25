@@ -1,0 +1,60 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+model Inventory {
+  id          String   @id @default(uuid())
+  productId   String   @unique
+  sku         String   @unique
+  quantity    Int      // Non-negative
+  reserved    Int      @default(0) // Sum of active reservations
+  version     Int      @default(0) // Optimistic locking
+  threshold   Int      @default(5) // Low-stock alert threshold
+  updatedAt   DateTime @updatedAt
+
+  reservations Reservation[]
+  history      InventoryHistory[]
+}
+
+model Reservation {
+  id            String            @id @default(uuid())
+  inventoryId   String
+  quantity      Int
+  status        ReservationStatus @default(ACTIVE)
+  referenceType String            // 'CART' | 'FLASH_SALE'
+  referenceId   String            // cartSessionId or flashSaleItemId
+  expiresAt     DateTime
+  createdAt     DateTime          @default(now())
+  inventory     Inventory         @relation(fields: [inventoryId], references: [id])
+
+  @@index([referenceId, status])
+  @@index([expiresAt, status]) // For cleanup job
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CONFIRMED
+  RELEASED
+  EXPIRED
+}
+
+model InventoryHistory {
+  id            String    @id @default(uuid())
+  inventoryId   String
+  action        String    // 'RESERVE' | 'CONFIRM' | 'RELEASE' | 'RESTOCK' | 'REFUND'
+  quantityDelta Int       // Positive = increase, negative = decrease
+  prevQuantity  Int
+  newQuantity   Int
+  referenceType String?
+  referenceId   String?
+  adminId       String?
+  createdAt     DateTime  @default(now())
+  inventory     Inventory @relation(fields: [inventoryId], references: [id])
+
+  @@index([inventoryId, createdAt])
+}

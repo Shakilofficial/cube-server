@@ -1,29 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@cube/logger';
-
-const BULK_SMS_RESPONSES: Record<number, string> = {
-  202: 'SMS Submitted Successfully',
-  1001: 'Invalid Number',
-  1002: 'Sender ID not correct / Sender ID is disabled',
-  1003: 'Please Required all fields / Contact Your System Administrator',
-  1005: 'Internal Error',
-  1006: 'Balance Validity Not Available',
-  1007: 'Balance Insufficient',
-  1011: 'User ID not found',
-  1012: 'Masking SMS must be sent in Bengali',
-  1013: 'Sender ID has not found Gateway by API Key',
-  1014: 'Sender Type Name not found using this sender by API Key',
-  1015: 'Sender ID has not found Any Valid Gateway by API Key',
-  1016: 'Sender Type Name Active Price Info not found by this sender ID',
-  1017: 'Sender Type Name Price Info not found by this sender ID',
-  1018: 'The Owner of this (username) Account is disabled',
-  1019: 'The (sender type name) Price of this (username) Account is disabled',
-  1020: 'The parent of this account is not found.',
-  1021: 'The parent active (sender type name) price of this account is not found.',
-  1031: 'Your Account Not Verified, Please Contact Administrator.',
-  1032: 'IP Not whitelisted',
-};
+import { Logger } from "@cube/logger";
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { BULK_SMS_RESPONSES } from "./utils/sms.utils";
 
 interface BulkSmsResponse {
   response_code: string | number;
@@ -39,20 +17,20 @@ export class SmsService {
   async sendSms(phone: string, message: string): Promise<void> {
     try {
       const apiKey =
-        this.config.get<string>('SMS_API_KEY') || '2Z5ENsglfgnBuj0nKyXI';
+        this.config.get<string>("SMS_API_KEY") || "2Z5ENsglfgnBuj0nKyXI";
       const senderId =
-        this.config.get<string>('SMS_SENDER_ID') || '8809648909034';
+        this.config.get<string>("SMS_SENDER_ID") || "8809648909034";
 
-      const url = new URL('http://bulksmsbd.net/api/smsapi');
-      url.searchParams.append('api_key', apiKey);
-      url.searchParams.append('type', 'text');
-      url.searchParams.append('number', phone);
-      url.searchParams.append('senderid', senderId);
-      url.searchParams.append('message', message);
+      const url = new URL("http://bulksmsbd.net/api/smsapi");
+      url.searchParams.append("api_key", apiKey);
+      url.searchParams.append("type", "text");
+      url.searchParams.append("number", phone);
+      url.searchParams.append("senderid", senderId);
+      url.searchParams.append("message", message);
 
       this.logger.log(`Dispatching SMS to ${phone} using BulkSMSBD...`);
 
-      const response = await fetch(url.toString(), { method: 'POST' });
+      const response = await fetch(url.toString(), { method: "POST" });
 
       if (!response.ok) {
         throw new Error(`BulkSMSBD API returned status ${response.status}`);
@@ -65,7 +43,7 @@ export class SmsService {
 
       if (apiCode === 202) {
         this.logger.log(
-          `SMS successfully submitted for ${phone}. Status: ${messageStatus} (SuccessID: ${body.success_id ?? 'N/A'})`,
+          `SMS successfully submitted for ${phone}. Status: ${messageStatus} (SuccessID: ${body.success_id ?? "N/A"})`,
         );
       } else {
         this.logger.error(

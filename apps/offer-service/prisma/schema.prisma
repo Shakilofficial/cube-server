@@ -1,0 +1,72 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+model Offer {
+  id              String      @id @default(uuid())
+  name            String
+  type            OfferType
+  value           Decimal     @db.Decimal(10, 2)
+  maxDiscount     Decimal?    @db.Decimal(10, 2) // Cap for percentage offers
+  status          OfferStatus @default(ACTIVE)
+  startAt         DateTime
+  endAt           DateTime
+  usageLimit      Int?        // Global limit
+  usageCount      Int         @default(0)
+  perUserLimit    Int?
+  minOrderAmount  Decimal?    @db.Decimal(10, 2)
+  applicability   ApplicabilityScope @default(STORE)
+  applicableIds   String[]    // productIds, brandIds, or categoryIds
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  flashSaleStock  FlashSaleStock?
+  couponCodes     CouponCode[]
+}
+
+enum OfferType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FLASH_SALE
+  BOGO
+  TIERED
+  FREE_SHIPPING
+}
+
+enum OfferStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+}
+
+enum ApplicabilityScope {
+  STORE
+  BRAND
+  CATEGORY
+  PRODUCT
+}
+
+model FlashSaleStock {
+  id          String  @id @default(uuid())
+  offerId     String  @unique
+  totalStock  Int
+  soldStock   Int     @default(0)
+  reserved    Int     @default(0)
+  version     Int     @default(0)
+  offer       Offer   @relation(fields: [offerId], references: [id])
+}
+
+model CouponCode {
+  id          String    @id @default(uuid())
+  offerId     String
+  code        String    @unique
+  usageCount  Int       @default(0)
+  offer       Offer     @relation(fields: [offerId], references: [id])
+
+  @@index([code])
+}

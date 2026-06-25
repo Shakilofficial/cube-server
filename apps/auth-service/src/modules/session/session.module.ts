@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { SessionController } from './session.controller';
-import { SessionService } from './session.service';
-import { TokenService } from './token.service';
-import { BlacklistService } from './blacklist.service';
+import { Module } from "@nestjs/common";
+import { SessionController } from "./session.controller";
+import { SessionService } from "./session.service";
+import { TokenService } from "./token.service";
+import { BlacklistService } from "./blacklist.service";
 
 @Module({
   imports: [],

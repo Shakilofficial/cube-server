@@ -1,5 +1,5 @@
-import { JwtAuthGuard, JwtUser, ResponseMessage } from '@cube/common';
-import { IMAGE_MIME_TYPES, StorageService, multerConfig } from '@cube/storage';
+import { JwtAuthGuard, JwtUser, ResponseMessage } from "@cube/common";
+import { IMAGE_MIME_TYPES, StorageService, multerConfig } from "@cube/storage";
 import {
   BadRequestException,
   Body,
@@ -14,17 +14,17 @@ import {
   UseGuards,
   UseInterceptors,
   Version,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { ProfileService } from './profile.service';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { ProfileService } from "./profile.service";
 
 /**
  * ProfileController handles profile-owner routes.
  * All routes are scoped to the authenticated user's own data.
  * Admin-facing routes (list, create, reindex) live in UsersController.
  */
-@Controller('users')
+@Controller("users")
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
   constructor(
@@ -36,13 +36,13 @@ export class ProfileController {
   // Own Profile
   // ─────────────────────────────────────────────────────────────────────────
 
-  @Get('profile')
-  @Version('1')
+  @Get("profile")
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User profile retrieved successfully')
+  @ResponseMessage("User profile retrieved successfully")
   getProfile(
     @CurrentUser() user: JwtUser,
-    @Headers('authorization') authHeader: string,
+    @Headers("authorization") authHeader: string,
   ) {
     return this.profileService.getProfile(user.sub, user.email, authHeader);
   }
@@ -63,25 +63,25 @@ export class ProfileController {
    *
    * Text-only updates (name / phone) work exactly as before with JSON body.
    */
-  @Patch('profile')
-  @Version('1')
+  @Patch("profile")
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User profile updated successfully')
+  @ResponseMessage("User profile updated successfully")
   @UseInterceptors(
     FileInterceptor(
-      'avatar',
+      "avatar",
       multerConfig({
         allowedMimeTypes: IMAGE_MIME_TYPES as unknown as any[],
-        sizeCategory: 'avatar',
+        sizeCategory: "avatar",
       }),
     ),
   )
   async updateProfile(
     @CurrentUser() user: JwtUser,
-    @Headers('authorization') authHeader: string,
+    @Headers("authorization") authHeader: string,
     @UploadedFile() avatarFile?: Express.Multer.File,
-    @Body('name') name?: string,
-    @Body('phone') phone?: string,
+    @Body("name") name?: string,
+    @Body("phone") phone?: string,
   ) {
     let avatarUrl: string | undefined;
 
@@ -98,7 +98,7 @@ export class ProfileController {
         folder: `avatars/${user.sub}`,
         originalName: avatarFile.originalname,
         mimeType: avatarFile.mimetype,
-        imagePreset: 'avatar',
+        imagePreset: "avatar",
         metadata: { userId: user.sub },
       });
 
@@ -113,7 +113,7 @@ export class ProfileController {
     // Validate that at least one field is being updated
     if (!name && !phone && !avatarFile) {
       throw new BadRequestException(
-        'At least one field (name, phone, or avatar) must be provided.',
+        "At least one field (name, phone, or avatar) must be provided.",
       );
     }
 
@@ -129,17 +129,18 @@ export class ProfileController {
   // Internal Profile Sync (called by oauth-service / other microservices)
   // ─────────────────────────────────────────────────────────────────────────
 
-  @Post('sync')
-  @Version('1')
+  @Post("sync")
+  @Version("1")
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('User profile synchronized successfully')
+  @ResponseMessage("User profile synchronized successfully")
   async syncProfile(
-    @Body() dto: { id: string; email: string; name: string; avatarUrl?: string },
-    @Headers('authorization') authHeader: string,
+    @Body()
+    dto: { id: string; email: string; name: string; avatarUrl?: string },
+    @Headers("authorization") authHeader: string,
   ) {
     if (!dto.id || !dto.email || !dto.name) {
       throw new BadRequestException(
-        'Missing required fields for profile synchronization.',
+        "Missing required fields for profile synchronization.",
       );
     }
     return this.profileService.upsertProfile(

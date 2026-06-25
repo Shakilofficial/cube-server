@@ -1,13 +1,17 @@
-import { paginationHelper } from '@cube/common';
-import { EmailPublisher, SmsPublisher } from '@cube/messaging';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
-import { createHash, randomInt } from 'crypto';
-import { addMinutes } from 'date-fns';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { RegisterDto } from './dto/register.dto';
+import { paginationHelper } from "@cube/common";
+import { EmailPublisher, SmsPublisher } from "@cube/messaging";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { randomInt } from "crypto";
+import { addMinutes } from "date-fns";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { RegisterDto } from "./dto/register.dto";
+import { hashPassword, hashSHA256 } from "../../core/utils/crypto.utils";
 
 @Injectable()
 export class RegistrationService {
@@ -20,34 +24,42 @@ export class RegistrationService {
 
   async register(dto: RegisterDto) {
     if (dto.email) {
-      const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      const existing = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
       if (existing) {
-        throw new ConflictException('An account with this email already exists.');
+        throw new ConflictException(
+          "An account with this email already exists.",
+        );
       }
     }
 
     if (dto.phone) {
-      const existing = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+      const existing = await this.prisma.user.findUnique({
+        where: { phone: dto.phone },
+      });
       if (existing) {
-        throw new ConflictException('An account with this phone number already exists.');
+        throw new ConflictException(
+          "An account with this phone number already exists.",
+        );
       }
     }
 
-    const rounds = Number(this.config.get('BCRYPT_ROUNDS')) || 12;
-    const passwordHash = await bcrypt.hash(dto.password, rounds);
+    const rounds = Number(this.config.get("BCRYPT_ROUNDS")) || 12;
+    const passwordHash = await hashPassword(dto.password, rounds);
 
     const user = await this.prisma.user.create({
       data: {
         email: dto.email || null,
         phone: dto.phone || null,
         passwordHash,
-        status: 'PENDING',
-        role: 'CUSTOMER',
+        status: "PENDING",
+        role: "CUSTOMER",
       },
     });
 
     const code = String(randomInt(10000, 99999)); // 5-digit code
-    const codeHash = createHash('sha256').update(code).digest('hex');
+    const codeHash = hashSHA256(code);
 
     await this.prisma.verificationCode.create({
       data: {
@@ -59,57 +71,78 @@ export class RegistrationService {
 
     if (dto.phone) {
       // Send OTP via SMS
-      await this.smsPublisher.sendOtp(dto.phone, 'Cube', code);
+      await this.smsPublisher.sendOtp(dto.phone, "Cube", code);
       return {
-        message: 'Registration successful. Please check your phone for a verification code.',
+        message:
+          "Registration successful. Please check your phone for a verification code.",
         userId: user.id,
-        ...(process.env.NODE_ENV !== 'production' && { _devCode: code }),
+        ...(process.env.NODE_ENV !== "production" && { _devCode: code }),
       };
     } else {
       // Send OTP via Email
-      const verifyUrl = `${this.config.get<string>('FRONTEND_URL') || 'http://localhost:3000'}/verify-email?userId=${user.id}&code=${code}`;
-      await this.emailPublisher.sendOtpEmail(dto.email!, dto.name, code, verifyUrl);
+      const verifyUrl = `${this.config.get<string>("FRONTEND_URL") || "http://localhost:3000"}/verify-email?userId=${user.id}&code=${code}`;
+      await this.emailPublisher.sendOtpEmail(
+        dto.email!,
+        dto.name,
+        code,
+        verifyUrl,
+      );
       return {
-        message: 'Registration successful. Please check your email for a verification code.',
+        message:
+          "Registration successful. Please check your email for a verification code.",
         userId: user.id,
-        ...(process.env.NODE_ENV !== 'production' && { _devCode: code }),
+        ...(process.env.NODE_ENV !== "production" && { _devCode: code }),
       };
     }
   }
 
   async createUser(dto: CreateUserDto) {
     if (dto.email) {
-      const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      const existing = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
       if (existing) {
-        throw new ConflictException('An account with this email already exists.');
+        throw new ConflictException(
+          "An account with this email already exists.",
+        );
       }
     }
 
     if (dto.phone) {
-      const existing = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+      const existing = await this.prisma.user.findUnique({
+        where: { phone: dto.phone },
+      });
       if (existing) {
-        throw new ConflictException('An account with this phone number already exists.');
+        throw new ConflictException(
+          "An account with this phone number already exists.",
+        );
       }
     }
 
-    const rounds = Number(this.config.get('BCRYPT_ROUNDS')) || 12;
-    const passwordHash = await bcrypt.hash(dto.password, rounds);
+    const rounds = Number(this.config.get("BCRYPT_ROUNDS")) || 12;
+    const passwordHash = await hashPassword(dto.password, rounds);
 
     const user = await this.prisma.user.create({
       data: {
         email: dto.email || null,
         phone: dto.phone || null,
         passwordHash,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         role: dto.role,
       },
     });
 
     if (user.email) {
       try {
-        await this.emailPublisher.sendWelcomeEmail(user.email, dto.name || user.email.split('@')[0]);
+        await this.emailPublisher.sendWelcomeEmail(
+          user.email,
+          dto.name || user.email.split("@")[0],
+        );
       } catch (err: any) {
-        console.error('Failed to send welcome email to admin-created user:', err.message || err);
+        console.error(
+          "Failed to send welcome email to admin-created user:",
+          err.message || err,
+        );
       }
     }
 
@@ -146,7 +179,7 @@ export class RegistrationService {
 
     if (options.ids) {
       const idList = options.ids
-        .split(',')
+        .split(",")
         .map((id) => id.trim())
         .filter(Boolean);
       if (idList.length > 0) {
@@ -156,16 +189,18 @@ export class RegistrationService {
 
     if (options.search) {
       where.OR = [
-        { email: { contains: options.search, mode: 'insensitive' } },
-        { phone: { contains: options.search, mode: 'insensitive' } },
+        { email: { contains: options.search, mode: "insensitive" } },
+        { phone: { contains: options.search, mode: "insensitive" } },
       ];
     }
 
     const total = await this.prisma.user.count({ where });
 
     // Validate if field exists on model
-    const allowedSortFields = ['createdAt', 'email', 'phone', 'role', 'status'];
-    const finalSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const allowedSortFields = ["createdAt", "email", "phone", "role", "status"];
+    const finalSortBy = allowedSortFields.includes(sortBy)
+      ? sortBy
+      : "createdAt";
 
     const users = await this.prisma.user.findMany({
       where,
@@ -216,4 +251,3 @@ export class RegistrationService {
     return user;
   }
 }
-

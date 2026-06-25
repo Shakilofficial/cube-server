@@ -5,27 +5,24 @@ import {
   BadRequestException,
   Logger,
   Inject,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { StorageService } from '@cube/storage';
-import { PRODUCT_EVENTS, paginationHelper } from '@cube/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { QueryProductDto } from './dto/query-product.dto';
-import { CreateBulkProductsDto } from './dto/create-bulk.dto';
+} from "@nestjs/common";
+import { ClientProxy } from "@nestjs/microservices";
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { StorageService } from "@cube/storage";
+import { PRODUCT_EVENTS, paginationHelper } from "@cube/common";
+import { CreateProductDto } from "./dto/create-product.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
+import { QueryProductDto } from "./dto/query-product.dto";
+import { CreateBulkProductsDto } from "./dto/create-bulk.dto";
+import { ProductStatus } from "../../../prisma/generated/prisma/enums";
 import {
-  generateUniqueSlug,
   buildOrderBy,
   buildWhereClause,
   buildInternalSearchWhereClause,
-  validateCategoryIds,
-  buildProductDocument,
-  ProductDocument,
   PRODUCT_INCLUDE,
-  generateUniqueSku,
-} from '../../common/helpers';
-
+} from "./utils/product.utils";
+import { validateCategoryIds } from "../category/helpers/category.helper";
+import { ProductHelper } from "./helpers/product.helper";
 
 @Injectable()
 export class ProductService {
@@ -34,7 +31,7 @@ export class ProductService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
-    @Inject('PRODUCT_EVENTS_QUEUE') private readonly eventClient: ClientProxy,
+    private readonly productHelper: ProductHelper,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -43,12 +40,14 @@ export class ProductService {
 
   async create(dto: CreateProductDto) {
     // Validate brand
-    const brand = await this.prisma.brand.findUnique({ where: { id: dto.brandId } });
+    const brand = await this.prisma.brand.findUnique({
+      where: { id: dto.brandId },
+    });
     if (!brand) throw new NotFoundException(`Brand ${dto.brandId} not found.`);
 
     let sku = dto.sku;
     if (!sku) {
-      sku = await generateUniqueSku(
+      sku = await this.productHelper.generateUniqueSku(
         this.prisma,
         brand.name,
         dto.name,
@@ -56,12 +55,18 @@ export class ProductService {
       );
     } else {
       // Validate SKU uniqueness
-      const existingSku = await this.prisma.product.findUnique({ where: { sku } });
-      if (existingSku) throw new ConflictException(`SKU "${sku}" is already in use.`);
+      const existingSku = await this.prisma.product.findUnique({
+        where: { sku },
+      });
+      if (existingSku)
+        throw new ConflictException(`SKU "${sku}" is already in use.`);
     }
 
     // Generate unique slug
-    const slug = await generateUniqueSlug(this.prisma, dto.name);
+    const slug = await this.productHelper.generateUniqueSlug(
+      this.prisma,
+      dto.name,
+    );
 
     // Validate categories
     if (dto.categoryIds?.length) {
@@ -86,7 +91,7 @@ export class ProductService {
       include: PRODUCT_INCLUDE,
     });
 
-    await this.publishEvent(PRODUCT_EVENTS.CREATED, product);
+    await this.productHelper.publishEvent(PRODUCT_EVENTS.CREATED, product);
     return product;
   }
 
@@ -95,12 +100,15 @@ export class ProductService {
       const createdProducts = [];
       for (const productDto of dto.products) {
         // Validate brand
-        const brand = await tx.brand.findUnique({ where: { id: productDto.brandId } });
-        if (!brand) throw new NotFoundException(`Brand ${productDto.brandId} not found.`);
+        const brand = await tx.brand.findUnique({
+          where: { id: productDto.brandId },
+        });
+        if (!brand)
+          throw new NotFoundException(`Brand ${productDto.brandId} not found.`);
 
         let sku = productDto.sku;
         if (!sku) {
-          sku = await generateUniqueSku(
+          sku = await this.productHelper.generateUniqueSku(
             tx,
             brand.name,
             productDto.name,
@@ -109,11 +117,15 @@ export class ProductService {
         } else {
           // Validate SKU uniqueness
           const existingSku = await tx.product.findUnique({ where: { sku } });
-          if (existingSku) throw new ConflictException(`SKU "${sku}" is already in use.`);
+          if (existingSku)
+            throw new ConflictException(`SKU "${sku}" is already in use.`);
         }
 
         // Generate unique slug
-        const slug = await generateUniqueSlug(tx, productDto.name);
+        const slug = await this.productHelper.generateUniqueSlug(
+          tx,
+          productDto.name,
+        );
 
         // Validate categories
         if (productDto.categoryIds?.length) {
@@ -131,7 +143,9 @@ export class ProductService {
             metadata: productDto.metadata ?? {},
             categories: productDto.categoryIds?.length
               ? {
-                  create: productDto.categoryIds.map((categoryId) => ({ categoryId })),
+                  create: productDto.categoryIds.map((categoryId) => ({
+                    categoryId,
+                  })),
                 }
               : undefined,
           },
@@ -145,7 +159,7 @@ export class ProductService {
 
     // Publish event for each product after commit
     for (const product of products) {
-      await this.publishEvent(PRODUCT_EVENTS.CREATED, product);
+      await this.productHelper.publishEvent(PRODUCT_EVENTS.CREATED, product);
     }
 
     return products;
@@ -179,7 +193,11 @@ export class ProductService {
   }
 
   /** Internal endpoint used as search-service PostgreSQL fallback */
-  async internalSearch(query: { search?: string; page?: number; limit?: number }) {
+  async internalSearch(query: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const { page, limit, skip } = paginationHelper.calculatePagination(query);
     const where = buildInternalSearchWhereClause(query);
     const products = await this.prisma.product.findMany({
@@ -212,8 +230,11 @@ export class ProductService {
     const existing = await this.findOne(id);
 
     if (dto.brandId && dto.brandId !== existing.brandId) {
-      const brand = await this.prisma.brand.findUnique({ where: { id: dto.brandId } });
-      if (!brand) throw new NotFoundException(`Brand ${dto.brandId} not found.`);
+      const brand = await this.prisma.brand.findUnique({
+        where: { id: dto.brandId },
+      });
+      if (!brand)
+        throw new NotFoundException(`Brand ${dto.brandId} not found.`);
     }
 
     const data: any = {
@@ -224,47 +245,59 @@ export class ProductService {
       ...(dto.metadata && { metadata: dto.metadata }),
     };
 
-    if (dto.name) {
-      data.slug = await generateUniqueSlug(this.prisma, dto.name, id);
-    }
-
-    if (dto.categoryIds !== undefined) {
-      if (dto.categoryIds.length) {
-        await validateCategoryIds(this.prisma, dto.categoryIds);
+    const product = await this.prisma.$transaction(async (tx) => {
+      if (dto.name) {
+        data.slug = await this.productHelper.generateUniqueSlug(
+          tx,
+          dto.name,
+          id,
+        );
       }
-      await this.prisma.productCategory.deleteMany({ where: { productId: id } });
-      if (dto.categoryIds.length) {
-        await this.prisma.productCategory.createMany({
-          data: dto.categoryIds.map((categoryId) => ({ productId: id, categoryId })),
-        });
-      }
-    }
 
-    const product = await this.prisma.product.update({
-      where: { id },
-      data,
-      include: PRODUCT_INCLUDE,
+      if (dto.categoryIds !== undefined) {
+        if (dto.categoryIds.length) {
+          await validateCategoryIds(tx, dto.categoryIds);
+        }
+        await tx.productCategory.deleteMany({ where: { productId: id } });
+        if (dto.categoryIds.length) {
+          await tx.productCategory.createMany({
+            data: dto.categoryIds.map((categoryId) => ({
+              productId: id,
+              categoryId,
+            })),
+          });
+        }
+      }
+
+      return tx.product.update({
+        where: { id },
+        data,
+        include: PRODUCT_INCLUDE,
+      });
     });
 
-    await this.publishEvent(PRODUCT_EVENTS.UPDATED, product);
+    await this.productHelper.publishEvent(PRODUCT_EVENTS.UPDATED, product);
     return product;
   }
 
-  async updateStatus(id: string, status: string) {
-    const validStatuses = ['DRAFT', 'ACTIVE', 'DISCONTINUED'];
+  async updateStatus(id: string, status: ProductStatus) {
+    const validStatuses = Object.values(ProductStatus);
     if (!validStatuses.includes(status)) {
       throw new BadRequestException(
-        `Invalid status. Allowed values: ${validStatuses.join(', ')}`,
+        `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
       );
     }
 
     const product = await this.prisma.product.update({
       where: { id },
-      data: { status: status as any },
+      data: { status },
       include: PRODUCT_INCLUDE,
     });
 
-    await this.publishEvent(PRODUCT_EVENTS.STATUS_CHANGED, product);
+    await this.productHelper.publishEvent(
+      PRODUCT_EVENTS.STATUS_CHANGED,
+      product,
+    );
     return product;
   }
 
@@ -284,8 +317,8 @@ export class ProductService {
 
     await this.prisma.product.delete({ where: { id } });
 
-    this.eventClient.emit(PRODUCT_EVENTS.DELETED, { id });
-    return { message: 'Product deleted successfully.' };
+    this.productHelper.emit(PRODUCT_EVENTS.DELETED, { id });
+    return { message: "Product deleted successfully." };
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -310,7 +343,7 @@ export class ProductService {
         folder: `products/${productId}`,
         originalName: file.originalname,
         mimeType: file.mimetype,
-        imagePreset: 'image',
+        imagePreset: "image",
       });
 
       // Upload thumbnail-sm (200×200)
@@ -318,7 +351,7 @@ export class ProductService {
         folder: `products/${productId}/thumbs`,
         originalName: file.originalname,
         mimeType: file.mimetype,
-        imagePreset: 'thumbnail-sm',
+        imagePreset: "thumbnail-sm",
       });
 
       // Upload thumbnail-md (400×400)
@@ -326,7 +359,7 @@ export class ProductService {
         folder: `products/${productId}/thumbs`,
         originalName: file.originalname,
         mimeType: file.mimetype,
-        imagePreset: 'thumbnail-md',
+        imagePreset: "thumbnail-md",
       });
 
       // First image is primary if none exist
@@ -347,7 +380,7 @@ export class ProductService {
 
     // Publish update to refresh search index
     const product = await this.findOne(productId);
-    await this.publishEvent(PRODUCT_EVENTS.UPDATED, product);
+    await this.productHelper.publishEvent(PRODUCT_EVENTS.UPDATED, product);
 
     return results;
   }
@@ -356,7 +389,8 @@ export class ProductService {
     const image = await this.prisma.productImage.findFirst({
       where: { id: imageId, productId },
     });
-    if (!image) throw new NotFoundException(`Image ${imageId} not found on product.`);
+    if (!image)
+      throw new NotFoundException(`Image ${imageId} not found on product.`);
 
     await this.storageService.delete(image.url).catch(() => {});
     await this.storageService.delete(image.thumbSmUrl).catch(() => {});
@@ -368,7 +402,7 @@ export class ProductService {
     if (image.isPrimary) {
       const next = await this.prisma.productImage.findFirst({
         where: { productId },
-        orderBy: { sortOrder: 'asc' },
+        orderBy: { sortOrder: "asc" },
       });
       if (next) {
         await this.prisma.productImage.update({
@@ -378,14 +412,19 @@ export class ProductService {
       }
     }
 
-    return { message: 'Image deleted successfully.' };
+    // Publish update event to sync search index
+    const product = await this.findOne(productId);
+    await this.productHelper.publishEvent(PRODUCT_EVENTS.UPDATED, product);
+
+    return { message: "Image deleted successfully." };
   }
 
   async setPrimaryImage(productId: string, imageId: string) {
     const image = await this.prisma.productImage.findFirst({
       where: { id: imageId, productId },
     });
-    if (!image) throw new NotFoundException(`Image ${imageId} not found on product.`);
+    if (!image)
+      throw new NotFoundException(`Image ${imageId} not found on product.`);
 
     // Clear existing primary, then set new one
     await this.prisma.$transaction([
@@ -399,23 +438,10 @@ export class ProductService {
       }),
     ]);
 
-    return { message: 'Primary image updated successfully.' };
-  }
+    // Publish update event to sync search index
+    const product = await this.findOne(productId);
+    await this.productHelper.publishEvent(PRODUCT_EVENTS.UPDATED, product);
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────────────────
-
-  async buildProductDocument(product: any): Promise<ProductDocument> {
-    return buildProductDocument(this.prisma, product);
-  }
-
-  private async publishEvent(event: string, product: any): Promise<void> {
-    try {
-      const doc = await this.buildProductDocument(product);
-      this.eventClient.emit(event, doc);
-    } catch (err: any) {
-      this.logger.warn(`Failed to emit ${event} event: ${err.message}`);
-    }
+    return { message: "Primary image updated successfully." };
   }
 }

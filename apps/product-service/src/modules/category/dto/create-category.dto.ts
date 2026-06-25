@@ -4,7 +4,7 @@ import {
   MinLength,
   MaxLength,
   IsUUID,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateCategoryDto {
   @IsString()

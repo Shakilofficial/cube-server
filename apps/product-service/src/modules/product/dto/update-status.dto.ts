@@ -1,7 +1,7 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum } from "class-validator";
+import { ProductStatus } from "../../../../prisma/generated/prisma/enums";
 
 export class UpdateStatusDto {
-  @IsString()
-  @IsEnum(['DRAFT', 'ACTIVE', 'DISCONTINUED'])
-  status: string;
+  @IsEnum(ProductStatus)
+  status: ProductStatus;
 }

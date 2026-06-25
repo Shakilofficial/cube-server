@@ -1,6 +1,6 @@
-import { Global, Module, OnApplicationBootstrap } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import { SeedService } from './seed.service';
+import { Global, Module, OnApplicationBootstrap } from "@nestjs/common";
+import { PrismaService } from "./prisma.service";
+import { SeedService } from "./seed.service";
 
 @Global()
 @Module({

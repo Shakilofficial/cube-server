@@ -1,5 +1,5 @@
-import { PrismaService } from '../../core/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { PrismaService } from "../../core/prisma/prisma.service";
+import { Injectable } from "@nestjs/common";
 
 interface LoginHistoryData {
   userId?: string;
@@ -29,7 +29,7 @@ export class LoginRepository {
   async findByUserId(userId: string, limit = 20) {
     return this.prisma.loginHistory.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
     });
   }

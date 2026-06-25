@@ -11,7 +11,7 @@ generator client {
 
 model Product {
   id          String          @id @default(uuid())
-  sku         String          @unique // Immutable after creation
+  sku         String          @unique
   name        String
   slug        String          @unique
   description String?
