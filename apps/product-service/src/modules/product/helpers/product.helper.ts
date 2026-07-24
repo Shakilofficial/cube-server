@@ -6,6 +6,7 @@ import {
   PRODUCT_INCLUDE,
   ProductDocument,
   generateSlug,
+  resolveCoverImage,
 } from "../utils/product.utils";
 
 @Injectable()
@@ -27,9 +28,20 @@ export class ProductHelper {
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
         : 0;
 
+    const variants = product.variants || [];
+    const variantSkus = variants.map((v: any) => v.sku);
+    const variantAttributes = variants.flatMap((v: any) =>
+      Object.entries(v.attributes || {}).map(([key, val]) => `${key}: ${val}`),
+    );
+
+    const prices = variants.map((v: any) => Number(v.price));
+    const minPrice = prices.length ? Math.min(...prices) : 0;
+    const maxPrice = prices.length ? Math.max(...prices) : 0;
+
+    const coverImage = resolveCoverImage(product);
+
     return {
       id: product.id,
-      sku: product.sku,
       name: product.name,
       description: product.description ?? "",
       brandName: product.brand?.name ?? "",
@@ -37,12 +49,17 @@ export class ProductHelper {
         product.categories
           ?.map((pc: any) => pc.category?.name)
           .filter(Boolean) ?? [],
-      price: Number(product.price),
+      colorNames: (product.colors ?? []).map((c: any) => c.name),
+      coverImageUrl: coverImage?.url ?? null,
       status: product.status,
       avgRating: Math.round(avgRating * 10) / 10,
       reviewCount: reviews.length,
       inStock: product.status === "ACTIVE",
       createdAt: product.createdAt.toISOString(),
+      variantSkus,
+      variantAttributes,
+      minPrice,
+      maxPrice,
     };
   }
 
@@ -84,6 +101,7 @@ export class ProductHelper {
     brandName: string,
     productName: string,
     metadata?: Record<string, any>,
+    excludeSkus?: Set<string>,
   ): Promise<string> {
     const brandClean = brandName.toUpperCase().replace(/[^A-Z0-9]/g, "");
     const brandPart = brandClean.substring(0, 3);
@@ -113,10 +131,16 @@ export class ProductHelper {
     let counter = 1;
 
     while (true) {
-      const existing = await tx.product.findUnique({
+      const existingVariant = await tx.productVariant.findUnique({
         where: { sku: finalSku },
       });
-      if (!existing) return finalSku;
+      const isExcluded = excludeSkus && excludeSkus.has(finalSku);
+      if (!existingVariant && !isExcluded) {
+        if (excludeSkus) {
+          excludeSkus.add(finalSku);
+        }
+        return finalSku;
+      }
 
       const suffix = `${counter++}`;
       finalSku = baseSku.substring(0, 10 - suffix.length) + suffix;

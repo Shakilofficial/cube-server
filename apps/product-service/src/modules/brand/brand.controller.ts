@@ -46,12 +46,12 @@ export class BrandController {
     return this.brandService.findAll(query);
   }
 
-  @Get(":id")
+  @Get(":slug")
   @Version("1")
   @HttpCode(HttpStatus.OK)
   @ResponseMessage("Brand retrieved successfully")
-  findOne(@Param("id") id: string) {
-    return this.brandService.findOne(id);
+  findOne(@Param("slug") slug: string) {
+    return this.brandService.findOneBySlug(slug);
   }
 
   // ─── Protected ───────────────────────────────────────────────────────────

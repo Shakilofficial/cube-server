@@ -23,4 +23,5 @@ export enum ApplicabilityScope {
   BRAND = "BRAND",
   CATEGORY = "CATEGORY",
   PRODUCT = "PRODUCT",
+  VARIANT = "VARIANT",
 }

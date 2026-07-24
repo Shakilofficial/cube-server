@@ -10,21 +10,22 @@ generator client {
 // ─── Product ──────────────────────────────────────────────────────────────────
 
 model Product {
-  id          String          @id @default(uuid())
-  sku         String          @unique
-  name        String
-  slug        String          @unique
-  description String?
-  price       Decimal         @db.Decimal(10, 2)
-  brandId     String
-  status      ProductStatus   @default(DRAFT)
-  images      ProductImage[]
-  categories  ProductCategory[]
-  reviews     ProductReview[]
-  metadata    Json?           // SEO fields, attributes, avgRating cache
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  brand       Brand           @relation(fields: [brandId], references: [id])
+  id             String            @id @default(uuid())
+  name           String
+  slug           String            @unique
+  description    String?
+  specifications Json?             // shared spec sheet: display, processor, battery, camera, etc.
+  brandId        String
+  status         ProductStatus     @default(DRAFT)
+  images         ProductImage[]    // generic/lifestyle images (colorId null)
+  colors         ProductColor[]
+  variants       ProductVariant[]
+  categories     ProductCategory[]
+  reviews        ProductReview[]
+  metadata       Json?             // SEO fields, cached attributes
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  brand          Brand             @relation(fields: [brandId], references: [id])
 
   @@index([status, brandId])
   @@index([slug])
@@ -34,6 +35,46 @@ enum ProductStatus {
   DRAFT
   ACTIVE
   DISCONTINUED
+}
+
+// ─── Product Color ────────────────────────────────────────────────────────────
+// Groups variants + images by color — selecting a color swaps the whole
+// gallery, matching Amazon/Flipkart-style electronics PDPs.
+
+model ProductColor {
+  id        String           @id @default(uuid())
+  productId String
+  name      String           // e.g. "Titanium Blue"
+  hexCode   String?          // for swatch rendering
+  sortOrder Int              @default(0)
+  product   Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images    ProductImage[]
+  variants  ProductVariant[]
+
+  @@unique([productId, name])
+}
+
+// ─── Product Variant ──────────────────────────────────────────────────────────
+// The actual sellable unit — one SKU, one price. Distinguished from siblings
+// by colorId + attributes (storage, RAM, etc.).
+
+model ProductVariant {
+  id             String       @id @default(uuid())
+  productId      String
+  colorId        String
+  sku            String       @unique
+  price          Decimal      @db.Decimal(10, 2)
+  compareAtPrice Decimal?     @db.Decimal(10, 2) // MRP shown struck-through when > price
+  attributes     Json         // e.g. { "storage": "256GB", "ram": "8GB" }
+  isDefault      Boolean      @default(false)    // pre-selected variant on the PDP
+  isActive       Boolean      @default(true)
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color          ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([productId])
+  @@index([colorId])
 }
 
 // ─── Brand ────────────────────────────────────────────────────────────────────
@@ -76,14 +117,19 @@ model ProductCategory {
 // ─── Product Image ────────────────────────────────────────────────────────────
 
 model ProductImage {
-  id        String  @id @default(uuid())
-  productId String
-  url       String  // Original (max 2048px WebP)
-  thumbSmUrl String // 200×200 WebP
-  thumbMdUrl String // 400×400 WebP
-  isPrimary Boolean @default(false)
-  sortOrder Int     @default(0)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id         String        @id @default(uuid())
+  productId  String
+  colorId    String?       // null = generic/lifestyle image not tied to a color
+  url        String        // Original (max 2048px WebP)
+  thumbSmUrl String        // 200×200 WebP
+  thumbMdUrl String        // 400×400 WebP
+  isPrimary  Boolean       @default(false)
+  sortOrder  Int           @default(0)
+  product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color      ProductColor? @relation(fields: [colorId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([colorId])
 }
 
 // ─── Product Review ───────────────────────────────────────────────────────────

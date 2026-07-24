@@ -44,12 +44,12 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
-  @Get(":id")
+  @Get(":slug")
   @Version("1")
   @HttpCode(HttpStatus.OK)
   @ResponseMessage("Category retrieved successfully")
-  findOne(@Param("id") id: string) {
-    return this.categoryService.findOne(id);
+  findOne(@Param("slug") slug: string) {
+    return this.categoryService.findOneBySlug(slug);
   }
 
   // ─── Protected ───────────────────────────────────────────────────────────

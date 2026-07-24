@@ -49,14 +49,14 @@ export class ReserveService {
           version       AS "version",
           threshold     AS "threshold"
         FROM "Inventory"
-        WHERE "productId" = ${dto.productId}
+        WHERE "variantId" = ${dto.variantId}
         FOR UPDATE
       `;
 
       const inv = rows[0];
       if (!inv) {
         throw new NotFoundException(
-          `Inventory for product "${dto.productId}" not found.`,
+          `Inventory for variant "${dto.variantId}" not found.`,
         );
       }
 

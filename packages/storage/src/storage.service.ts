@@ -1,3 +1,4 @@
+
 import {
   Inject,
   Injectable,
@@ -6,19 +7,17 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { Readable } from "stream";
 import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+  v2 as cloudinary,
+  UploadApiOptions,
+  UploadApiResponse,
+} from "cloudinary";
 import { v4 as uuidv4 } from "uuid";
 import { FileProcessorService, ImagePreset } from "./file-processor.service";
 
 export interface UploadOptions {
-  /** Folder prefix in S3, e.g. "avatars" or "documents" */
+  /** Folder prefix in Cloudinary, e.g. "avatars" or "documents" */
   folder: string;
   /** Original file name (used to determine extension for non-image files) */
   originalName: string;
@@ -26,14 +25,14 @@ export interface UploadOptions {
   mimeType: string;
   /** Image processing preset — only relevant for image files */
   imagePreset?: ImagePreset;
-  /** Optional custom metadata to attach to the S3 object */
+  /** Optional custom metadata to attach to the Cloudinary asset context */
   metadata?: Record<string, string>;
 }
 
 export interface UploadResult {
-  /** Full public CDN / S3 URL */
+  /** Full public Cloudinary delivery URL */
   url: string;
-  /** S3 object key (used for deletion) */
+  /** Cloudinary public ID (used for deletion) */
   key: string;
   /** Final MIME type after processing */
   mimeType: string;
@@ -43,33 +42,34 @@ export interface UploadResult {
   compressionRatio: string;
 }
 
+type CloudinaryResourceType = "image" | "video" | "raw";
+
+interface CloudinaryAssetIdentifier {
+  publicId: string;
+  resourceType: CloudinaryResourceType;
+}
+
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly s3: S3Client;
-  private readonly bucket: string;
-  private readonly region: string;
+  private readonly cloudName: string;
 
   constructor(
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(FileProcessorService)
     private readonly fileProcessor: FileProcessorService,
   ) {
-    this.region = this.config.getOrThrow<string>("AWS_REGION");
-    this.bucket = this.config.getOrThrow<string>("AWS_S3_BUCKET_NAME");
+    this.cloudName = this.config.getOrThrow<string>("CLOUDINARY_CLOUD_NAME");
 
-    this.s3 = new S3Client({
-      region: this.region,
-      credentials: {
-        accessKeyId: this.config.getOrThrow<string>("AWS_ACCESS_KEY_ID"),
-        secretAccessKey: this.config.getOrThrow<string>(
-          "AWS_SECRET_ACCESS_KEY",
-        ),
-      },
+    cloudinary.config({
+      cloud_name: this.cloudName,
+      api_key: this.config.getOrThrow<string>("CLOUDINARY_API_KEY"),
+      api_secret: this.config.getOrThrow<string>("CLOUDINARY_API_SECRET"),
+      secure: true,
     });
 
     this.logger.log(
-      `StorageService initialized — bucket: ${this.bucket}, region: ${this.region}`,
+      `StorageService initialized — Cloudinary cloud: ${this.cloudName}`,
     );
   }
 
@@ -78,8 +78,8 @@ export class StorageService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Process (compress/resize) and upload a file to S3.
-   * Returns the public URL and S3 key for later deletion.
+   * Process (compress/resize) and upload a file to Cloudinary.
+   * Returns the public URL and public ID for later deletion.
    */
   async upload(buffer: Buffer, options: UploadOptions): Promise<UploadResult> {
     const {
@@ -98,31 +98,35 @@ export class StorageService {
       imagePreset,
     );
 
-    // 2. Build a unique S3 key with a timestamp prefix for cache-busting
+    // 2. Build a unique public ID with a timestamp prefix for cache-busting
     const timestamp = Date.now();
     const uniqueId = uuidv4().replace(/-/g, "").slice(0, 12);
-    const key = `${folder}/${timestamp}-${uniqueId}.${processed.extension}`;
+    const resourceType = this.resourceTypeFor(processed.mimeType);
+    // Cloudinary auto-appends the detected format for image/video assets, but
+    // "raw" assets are delivered byte-for-byte under the public ID as given —
+    // so the extension must be baked in for raw uploads to keep a usable name.
+    const publicId =
+      resourceType === "raw"
+        ? `${folder}/${timestamp}-${uniqueId}.${processed.extension}`
+        : `${folder}/${timestamp}-${uniqueId}`;
 
-    // 3. Upload to S3
+    // 3. Upload to Cloudinary
+    let result: UploadApiResponse;
     try {
-      await this.s3.send(
-        new PutObjectCommand({
-          Bucket: this.bucket,
-          Key: key,
-          Body: processed.buffer,
-          ContentType: processed.mimeType,
-          CacheControl: "max-age=31536000, immutable",
-          Metadata: {
-            originalName,
-            originalMimeType: mimeType,
-            compressionRatio: processed.compressionRatio,
-            ...metadata,
-          },
-        }),
-      );
+      result = await this.uploadBuffer(processed.buffer, {
+        public_id: publicId,
+        resource_type: resourceType,
+        overwrite: false,
+        context: {
+          original_filename: originalName,
+          original_mime_type: mimeType,
+          compression_ratio: processed.compressionRatio,
+          ...metadata,
+        },
+      });
     } catch (err: any) {
       this.logger.error(
-        `S3 upload failed for key "${key}": ${err.message}`,
+        `Cloudinary upload failed for public ID "${publicId}": ${err.message}`,
         err.stack,
       );
       throw new InternalServerErrorException(
@@ -130,15 +134,13 @@ export class StorageService {
       );
     }
 
-    const url = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
-
     this.logger.log(
-      `Uploaded: ${key} | ${processed.originalSize} → ${processed.processedSize} bytes (${processed.compressionRatio})`,
+      `Uploaded: ${result.public_id} | ${processed.originalSize} → ${processed.processedSize} bytes (${processed.compressionRatio})`,
     );
 
     return {
-      url,
-      key,
+      url: result.secure_url,
+      key: result.public_id,
       mimeType: processed.mimeType,
       size: processed.processedSize,
       compressionRatio: processed.compressionRatio,
@@ -150,12 +152,12 @@ export class StorageService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Delete an object from S3 by its full URL or key.
-   * Silently succeeds if the object does not exist.
+   * Delete an asset from Cloudinary by its full delivery URL or public ID.
+   * Silently succeeds if the asset does not exist.
    */
   async delete(urlOrKey: string): Promise<void> {
-    const key = this.extractKeyFromUrl(urlOrKey);
-    if (!key) {
+    const identifier = this.resolveIdentifier(urlOrKey);
+    if (!identifier) {
       this.logger.warn(
         `delete() called with an unresolvable URL/key: "${urlOrKey}"`,
       );
@@ -163,13 +165,16 @@ export class StorageService {
     }
 
     try {
-      await this.s3.send(
-        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
-      );
-      this.logger.log(`Deleted S3 object: ${key}`);
+      await cloudinary.uploader.destroy(identifier.publicId, {
+        resource_type: identifier.resourceType,
+        invalidate: true,
+      });
+      this.logger.log(`Deleted Cloudinary asset: ${identifier.publicId}`);
     } catch (err: any) {
       // Log but do not throw — deletion failures are non-fatal
-      this.logger.error(`Failed to delete S3 object "${key}": ${err.message}`);
+      this.logger.error(
+        `Failed to delete Cloudinary asset "${identifier.publicId}": ${err.message}`,
+      );
     }
   }
 
@@ -178,23 +183,35 @@ export class StorageService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Generate a short-lived presigned download URL for a private S3 object.
-   * Useful for documents and other private files.
+   * Generate a signed, time-limited download URL for a Cloudinary asset.
+   * Note: unlike S3, this only truly expires for assets whose Cloudinary
+   * delivery type is "authenticated" — for standard "upload" type assets
+   * (what `upload()` produces) the link is signed but publicly reachable
+   * at the same URL regardless of `expiresInSeconds`.
    */
   async getPresignedDownloadUrl(
     urlOrKey: string,
     expiresInSeconds = 3600,
   ): Promise<string> {
-    const key = this.extractKeyFromUrl(urlOrKey);
-    if (!key) {
+    const identifier = this.resolveIdentifier(urlOrKey);
+    if (!identifier) {
       throw new NotFoundException(`Object not found: ${urlOrKey}`);
     }
 
     try {
-      const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-      return getSignedUrl(this.s3, command, { expiresIn: expiresInSeconds });
+      return cloudinary.utils.private_download_url(
+        identifier.publicId,
+        "",
+        {
+          resource_type: identifier.resourceType,
+          type: "upload",
+          expires_at: Math.floor(Date.now() / 1000) + expiresInSeconds,
+        },
+      );
     } catch (err: any) {
-      this.logger.error(`Failed to presign URL for "${key}": ${err.message}`);
+      this.logger.error(
+        `Failed to presign URL for "${identifier.publicId}": ${err.message}`,
+      );
       throw new InternalServerErrorException(
         "Could not generate download URL.",
       );
@@ -206,12 +223,12 @@ export class StorageService {
   // ─────────────────────────────────────────────────────────────────────────
 
   async exists(urlOrKey: string): Promise<boolean> {
-    const key = this.extractKeyFromUrl(urlOrKey);
-    if (!key) return false;
+    const identifier = this.resolveIdentifier(urlOrKey);
+    if (!identifier) return false;
     try {
-      await this.s3.send(
-        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
-      );
+      await cloudinary.api.resource(identifier.publicId, {
+        resource_type: identifier.resourceType,
+      });
       return true;
     } catch {
       return false;
@@ -222,20 +239,65 @@ export class StorageService {
   // Utility
   // ─────────────────────────────────────────────────────────────────────────
 
+  private uploadBuffer(
+    buffer: Buffer,
+    options: UploadApiOptions,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        options,
+        (error, result) => {
+          if (error || !result) {
+            return reject(error ?? new Error("Empty Cloudinary response"));
+          }
+          resolve(result);
+        },
+      );
+      Readable.from(buffer).pipe(uploadStream);
+    });
+  }
+
+  private resourceTypeFor(mimeType: string): CloudinaryResourceType {
+    if (mimeType.startsWith("image/")) return "image";
+    if (mimeType.startsWith("video/") || mimeType.startsWith("audio/"))
+      return "video";
+    return "raw";
+  }
+
   /**
-   * Extract the S3 key from a full S3 URL or return the input as-is if it
-   * already looks like a key (no leading "https://").
+   * Resolve a stored URL or bare public ID into a public ID + resource type
+   * pair. Cloudinary delivery URLs encode the resource type as the path
+   * segment right before "/upload/" (e.g. ".../image/upload/v169.../key.webp"),
+   * which is the only place that information is recoverable from a URL alone.
    */
-  private extractKeyFromUrl(urlOrKey: string): string | null {
+  private resolveIdentifier(
+    urlOrKey: string,
+  ): CloudinaryAssetIdentifier | null {
     if (!urlOrKey) return null;
 
-    // Already a key (no protocol)
-    if (!urlOrKey.startsWith("http")) return urlOrKey;
+    if (!urlOrKey.startsWith("http")) {
+      return { publicId: urlOrKey, resourceType: "image" };
+    }
 
     try {
       const url = new URL(urlOrKey);
-      // pathname starts with "/", strip the leading slash
-      return url.pathname.slice(1);
+      const parts = url.pathname.split("/").filter(Boolean);
+      const uploadIdx = parts.indexOf("upload");
+      if (uploadIdx < 1) return null;
+
+      const resourceType = parts[uploadIdx - 1] as CloudinaryResourceType;
+      if (!["image", "video", "raw"].includes(resourceType)) return null;
+
+      let rest = parts.slice(uploadIdx + 1);
+      if (rest[0] && /^v\d+$/.test(rest[0])) {
+        rest = rest.slice(1);
+      }
+      const joined = rest.join("/");
+      const publicId =
+        resourceType === "raw" ? joined : joined.replace(/\.[^./]+$/, "");
+
+      if (!publicId) return null;
+      return { publicId, resourceType };
     } catch {
       return null;
     }

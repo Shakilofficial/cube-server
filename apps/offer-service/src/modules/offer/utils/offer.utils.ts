@@ -27,6 +27,10 @@ export function isOfferEligible(
     return items.some((item) => offer.applicableIds.includes(item.productId));
   }
 
+  if (offer.applicability === "VARIANT") {
+    return items.some((item) => item.variantId && offer.applicableIds.includes(item.variantId));
+  }
+
   if (offer.applicability === "BRAND") {
     return items.some((item) => offer.applicableIds.includes(item.brandId));
   }
@@ -53,6 +57,8 @@ export function computeOfferDiscount(
   let eligible = items;
   if (offer.applicability === "PRODUCT") {
     eligible = items.filter((i) => offer.applicableIds.includes(i.productId));
+  } else if (offer.applicability === "VARIANT") {
+    eligible = items.filter((i) => i.variantId && offer.applicableIds.includes(i.variantId));
   } else if (offer.applicability === "BRAND") {
     eligible = items.filter((i) => offer.applicableIds.includes(i.brandId));
   } else if (offer.applicability === "CATEGORY") {

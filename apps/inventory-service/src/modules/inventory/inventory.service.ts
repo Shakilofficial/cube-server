@@ -30,21 +30,29 @@ export class InventoryService {
   // Read
   // ─────────────────────────────────────────────────────────────────────────
 
-  async getStock(productId: string) {
+  async getVariantStock(variantId: string) {
     const inv = await this.prisma.inventory.findUnique({
-      where: { productId },
+      where: { variantId },
       include: {
         reservations: { where: { status: "ACTIVE" } },
         _count: { select: { reservations: true, history: true } },
       },
     });
     if (!inv) {
-      throw new NotFoundException(
-        `Inventory for product "${productId}" not found.`,
-      );
+      throw new NotFoundException(`Inventory for variant "${variantId}" not found.`);
     }
-
     return { ...inv, available: inv.quantity - inv.reserved };
+  }
+
+  async getProductStock(productId: string) {
+    const invs = await this.prisma.inventory.findMany({
+      where: { productId },
+      include: {
+        reservations: { where: { status: "ACTIVE" } },
+        _count: { select: { reservations: true, history: true } },
+      },
+    });
+    return invs.map((inv) => ({ ...inv, available: inv.quantity - inv.reserved }));
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -204,13 +212,13 @@ export class InventoryService {
 
     return this.prisma.$transaction(async (tx) => {
       let inv = await tx.inventory.findUnique({
-        where: { productId: dto.productId },
+        where: { variantId: dto.variantId },
       });
 
       if (!inv) {
         if (!dto.sku) {
           throw new BadRequestException(
-            `SKU is required to initialise inventory for product "${dto.productId}".`,
+            `SKU is required to initialise inventory for variant "${dto.variantId}".`,
           );
         }
 
@@ -219,13 +227,14 @@ export class InventoryService {
         });
         if (skuConflict) {
           throw new ConflictException(
-            `SKU "${dto.sku}" is already in use by another product.`,
+            `SKU "${dto.sku}" is already in use by another variant.`,
           );
         }
 
         inv = await tx.inventory.create({
           data: {
             productId: dto.productId,
+            variantId: dto.variantId,
             sku: dto.sku,
             quantity: dto.quantity,
             reserved: 0,
@@ -244,7 +253,7 @@ export class InventoryService {
         });
 
         this.logger.log(
-          `Initialised inventory for product ${dto.productId} with ${dto.quantity} units.`,
+          `Initialised inventory for variant ${dto.variantId} with ${dto.quantity} units.`,
         );
         return { ...inv, available: inv.quantity - inv.reserved };
       }
@@ -269,7 +278,7 @@ export class InventoryService {
       });
 
       this.logger.log(
-        `Restocked product ${dto.productId}: +${dto.quantity} units.`,
+        `Restocked variant ${dto.variantId}: +${dto.quantity} units.`,
       );
       return { ...updated, available: updated.quantity - updated.reserved };
     });
@@ -284,7 +293,7 @@ export class InventoryService {
     for (const item of items) {
       if (item.quantity < 0) {
         throw new BadRequestException(
-          `Quantity for product "${item.productId}" must be non-negative.`,
+          `Quantity for variant "${item.variantId}" must be non-negative.`,
         );
       }
     }
@@ -294,7 +303,7 @@ export class InventoryService {
 
       for (const item of items) {
         let inv = await tx.inventory.findUnique({
-          where: { productId: item.productId },
+          where: { variantId: item.variantId },
         });
 
         if (inv) {
@@ -318,9 +327,19 @@ export class InventoryService {
             },
           });
         } else {
+          const skuConflict = await tx.inventory.findUnique({
+            where: { sku: item.sku },
+          });
+          if (skuConflict) {
+            throw new ConflictException(
+              `SKU "${item.sku}" is already in use.`,
+            );
+          }
+
           inv = await tx.inventory.create({
             data: {
               productId: item.productId,
+              variantId: item.variantId,
               sku: item.sku,
               quantity: item.quantity,
               threshold: item.threshold ?? 5,

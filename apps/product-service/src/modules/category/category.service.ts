@@ -1,17 +1,17 @@
+import { StorageService } from "@cube/storage";
 import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
   BadRequestException,
+  ConflictException,
+  Injectable,
   Logger,
+  NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../../core/prisma/prisma.service";
+import { ProductHelper } from "../product/helpers/product.helper";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { generateSlug, buildCategoryTree } from "./utils/category.utils";
 import { guardCircularReference } from "./helpers/category.helper";
-import { StorageService } from "@cube/storage";
-import { ProductHelper } from "../product/helpers/product.helper";
+import { buildCategoryTree, generateSlug } from "./utils/category.utils";
 
 @Injectable()
 export class CategoryService {
@@ -72,6 +72,21 @@ export class CategoryService {
       include: { _count: { select: { products: true } } },
     });
     return buildCategoryTree(all);
+  }
+
+  async findOneBySlug(slug: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { slug },
+      include: {
+        parent: true,
+        children: true,
+        _count: { select: { products: true } },
+      },
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with slug "${slug}" not found.`);
+    }
+    return category;
   }
 
   async findOne(id: string) {

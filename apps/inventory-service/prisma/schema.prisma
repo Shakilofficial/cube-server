@@ -9,7 +9,8 @@ generator client {
 
 model Inventory {
   id          String   @id @default(uuid())
-  productId   String   @unique
+  productId   String
+  variantId   String   @unique
   sku         String   @unique
   quantity    Int      // Non-negative
   reserved    Int      @default(0) // Sum of active reservations
@@ -19,6 +20,8 @@ model Inventory {
 
   reservations Reservation[]
   history      InventoryHistory[]
+
+  @@index([productId])
 }
 
 model Reservation {

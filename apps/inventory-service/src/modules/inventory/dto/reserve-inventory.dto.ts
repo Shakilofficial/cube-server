@@ -5,6 +5,10 @@ export class ReserveInventoryDto {
   @IsNotEmpty()
   productId: string;
 
+  @IsString()
+  @IsNotEmpty()
+  variantId: string;
+
   @IsInt()
   @Min(1)
   quantity: number;

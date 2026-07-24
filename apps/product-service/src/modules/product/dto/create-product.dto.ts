@@ -1,22 +1,19 @@
 import { Type } from "class-transformer";
 import {
+  ArrayMinSize,
   IsArray,
   IsObject,
   IsOptional,
-  IsPositive,
   IsString,
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from "class-validator";
+import { CreateProductColorDto } from "./create-color.dto";
+import { CreateProductVariantDto } from "./create-variant.dto";
 
 export class CreateProductDto {
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  @MaxLength(50)
-  sku?: string;
-
   @IsString()
   @MinLength(2)
   @MaxLength(200)
@@ -27,9 +24,9 @@ export class CreateProductDto {
   @MaxLength(5000)
   description?: string;
 
-  @Type(() => Number)
-  @IsPositive()
-  price: number;
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, any>;
 
   @IsUUID()
   brandId: string;
@@ -42,4 +39,16 @@ export class CreateProductDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
+
+  @IsArray()
+  @ArrayMinSize(1, { message: "At least one color is required." })
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductColorDto)
+  colors: CreateProductColorDto[];
+
+  @IsArray()
+  @ArrayMinSize(1, { message: "At least one variant is required." })
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductVariantDto)
+  variants: CreateProductVariantDto[];
 }

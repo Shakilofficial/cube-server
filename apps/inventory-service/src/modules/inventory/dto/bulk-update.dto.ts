@@ -14,6 +14,10 @@ export class BulkUpdateItemDto {
   @IsNotEmpty()
   productId: string;
 
+  @IsString()
+  @IsNotEmpty()
+  variantId: string;
+
   @IsInt()
   @Min(0)
   quantity: number;

@@ -259,10 +259,9 @@ NODE_ENV=development
 DATABASE_URL="postgresql://postgres:123456@localhost:5432/user_db"
 JWT_ACCESS_SECRET="7f3a9b2c8d1e4f6a9b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c"
 AUTH_SERVICE_URL="http://localhost:3001"
-AWS_REGION="us-east-1"
-AWS_S3_BUCKET_NAME="cube-avatars"
-AWS_ACCESS_KEY_ID="minioadmin"
-AWS_SECRET_ACCESS_KEY="minioadmin"
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
 ```
 
 ### Product Service (`apps/product-service/.env`)
@@ -272,10 +271,9 @@ NODE_ENV=development
 DATABASE_URL="postgresql://postgres:123456@localhost:5432/product_db"
 JWT_ACCESS_SECRET="7f3a9b2c8d1e4f6a9b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c"
 RABBITMQ_URL="amqp://localhost:5672"
-AWS_REGION="us-east-1"
-AWS_S3_BUCKET_NAME="cube-products"
-AWS_ACCESS_KEY_ID="minioadmin"
-AWS_SECRET_ACCESS_KEY="minioadmin"
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
 ```
 
 ### Search Service (`apps/search-service/.env`)

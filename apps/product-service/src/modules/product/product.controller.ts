@@ -1,4 +1,13 @@
 import {
+  JwtAuthGuard,
+  JwtUser,
+  ResponseMessage,
+  Roles,
+  RolesGuard,
+  UserRole,
+} from "@cube/common";
+import { IMAGE_MIME_TYPES, multerConfig } from "@cube/storage";
+import {
   Body,
   Controller,
   Delete,
@@ -15,33 +24,30 @@ import {
   Version,
 } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
-import { ProductService } from "./product.service";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
-import { QueryProductDto } from "./dto/query-product.dto";
-import { UpdateStatusDto } from "./dto/update-status.dto";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { OptionalJwtAuthGuard } from "../../common/guards/optional-jwt-auth.guard";
 import { CreateBulkProductsDto } from "./dto/create-bulk.dto";
-import {
-  JwtAuthGuard,
-  Roles,
-  RolesGuard,
-  UserRole,
-  ResponseMessage,
-} from "@cube/common";
-import { IMAGE_MIME_TYPES, multerConfig } from "@cube/storage";
+import { CreateProductColorDto } from "./dto/create-color.dto";
+import { CreateProductDto } from "./dto/create-product.dto";
+import { QueryProductDto } from "./dto/query-product.dto";
+import { UpdateProductColorDto } from "./dto/update-color.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
+import { UpdateStatusDto } from "./dto/update-status.dto";
+import { ProductService } from "./product.service";
 
 @Controller("products")
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  // ─── Public ──────────────────────────────────────────────────────────────
+  // ─── Public / Optional Auth ──────────────────────────────────────────────
 
   @Get()
   @Version("1")
+  @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage("Products retrieved successfully")
-  findAll(@Query() query: QueryProductDto) {
-    return this.productService.findAll(query);
+  findAll(@Query() query: QueryProductDto, @CurrentUser() user?: JwtUser) {
+    return this.productService.findAll(query, user);
   }
 
   @Get("internal/search")
@@ -55,12 +61,48 @@ export class ProductController {
     return this.productService.internalSearch({ search, page, limit });
   }
 
-  @Get(":id")
+  @Get("brand/:slug")
   @Version("1")
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Brand products retrieved successfully")
+  findAllByBrand(
+    @Param("slug") slug: string,
+    @Query() query: QueryProductDto,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.productService.findAllByBrandSlug(slug, query, user);
+  }
+
+  @Get("category/:slug")
+  @Version("1")
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Category products retrieved successfully")
+  findAllByCategory(
+    @Param("slug") slug: string,
+    @Query() query: QueryProductDto,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.productService.findAllByCategorySlug(slug, query, user);
+  }
+
+  @Get(":slug/related")
+  @Version("1")
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Related products retrieved successfully")
+  findRelated(@Param("slug") slug: string, @CurrentUser() user?: JwtUser) {
+    return this.productService.findRelatedProducts(slug, user);
+  }
+
+  @Get(":slug")
+  @Version("1")
+  @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ResponseMessage("Product retrieved successfully")
-  findOne(@Param("id") id: string) {
-    return this.productService.findOne(id);
+  findOne(@Param("slug") slug: string, @CurrentUser() user?: JwtUser) {
+    return this.productService.findOneBySlug(slug, user);
   }
 
   // ─── Protected — Write ───────────────────────────────────────────────────
@@ -115,6 +157,42 @@ export class ProductController {
     return this.productService.remove(id);
   }
 
+  // ─── Color Management ─────────────────────────────────────────────────────
+
+  @Post(":id/colors")
+  @Version("1")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ResponseMessage("Color created successfully")
+  createColor(@Param("id") id: string, @Body() dto: CreateProductColorDto) {
+    return this.productService.createColor(id, dto);
+  }
+
+  @Patch(":id/colors/:colorId")
+  @Version("1")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Color updated successfully")
+  updateColor(
+    @Param("id") id: string,
+    @Param("colorId") colorId: string,
+    @Body() dto: UpdateProductColorDto,
+  ) {
+    return this.productService.updateColor(id, colorId, dto);
+  }
+
+  @Delete(":id/colors/:colorId")
+  @Version("1")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Color deleted successfully")
+  removeColor(@Param("id") id: string, @Param("colorId") colorId: string) {
+    return this.productService.removeColor(id, colorId);
+  }
+
   // ─── Image Management ─────────────────────────────────────────────────────
 
   @Post(":id/images")
@@ -136,8 +214,9 @@ export class ProductController {
   uploadImages(
     @Param("id") id: string,
     @UploadedFiles() files: Express.Multer.File[],
+    @Query("colorId") colorId?: string,
   ) {
-    return this.productService.uploadImages(id, files);
+    return this.productService.uploadImages(id, files, colorId);
   }
 
   @Delete(":id/images/:imageId")

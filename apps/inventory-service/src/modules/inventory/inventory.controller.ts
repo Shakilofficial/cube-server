@@ -32,12 +32,20 @@ export class InventoryController {
 
   // ─── Public ──────────────────────────────────────────────────────────────
 
-  @Get(":productId")
+  @Get("variant/:variantId")
   @Version("1")
   @HttpCode(HttpStatus.OK)
   @ResponseMessage("Inventory retrieved successfully")
-  getStock(@Param("productId") productId: string) {
-    return this.inventoryService.getStock(productId);
+  getVariantStock(@Param("variantId") variantId: string) {
+    return this.inventoryService.getVariantStock(variantId);
+  }
+
+  @Get("product/:productId")
+  @Version("1")
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage("Inventory retrieved successfully")
+  getProductStock(@Param("productId") productId: string) {
+    return this.inventoryService.getProductStock(productId);
   }
 
   // ─── Service-to-Service Operations ───────────────────────────────────────

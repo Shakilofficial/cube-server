@@ -25,14 +25,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "register"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "register"]
             }
           },
           "response": [],
@@ -71,14 +65,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/verify-email",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "verify-email"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "verify-email"]
             }
           },
           "response": []
@@ -99,14 +87,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/resend-verification",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "resend-verification"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "resend-verification"]
             }
           },
           "response": [],
@@ -142,14 +124,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/send-sms-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "send-sms-otp"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "send-sms-otp"]
             }
           },
           "response": [],
@@ -185,14 +161,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "login"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "login"]
             }
           },
           "response": [],
@@ -237,14 +207,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/complete-profile",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "complete-profile"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "complete-profile"]
             }
           },
           "response": [],
@@ -283,14 +247,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/verify-login-otp",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "verify-login-otp"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "verify-login-otp"]
             }
           },
           "response": [],
@@ -329,15 +287,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/mfa/verify",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "mfa",
-                "verify"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "mfa", "verify"]
             }
           },
           "response": [],
@@ -377,14 +328,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/refresh",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "refresh"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "refresh"]
             }
           },
           "response": [],
@@ -429,14 +374,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/logout",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "logout"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "logout"]
             }
           },
           "response": []
@@ -454,15 +393,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/auth/login/history?limit=20",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "login",
-                "history"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "login", "history"],
               "query": [
                 {
                   "key": "limit",
@@ -490,15 +422,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/password/forgot",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "password",
-                "forgot"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "password", "forgot"]
             }
           },
           "response": []
@@ -519,15 +444,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/password/reset",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "password",
-                "reset"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "password", "reset"]
             }
           },
           "response": []
@@ -554,15 +472,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/password/change",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "password",
-                "change"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "password", "change"]
             }
           },
           "response": []
@@ -574,15 +485,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/v1/auth/oauth/google",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "oauth",
-                "google"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "oauth", "google"]
             }
           },
           "response": []
@@ -594,16 +498,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/v1/auth/oauth/google/callback?code=example_authorization_code",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "oauth",
-                "google",
-                "callback"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "oauth", "google", "callback"],
               "query": [
                 {
                   "key": "code",
@@ -630,16 +526,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/oauth/google/callback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "oauth",
-                "google",
-                "callback"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "oauth", "google", "callback"]
             }
           },
           "response": []
@@ -660,14 +548,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/test-push",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "test-push"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "test-push"]
             }
           },
           "response": []
@@ -690,14 +572,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/users/profile",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "profile"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "profile"]
             }
           },
           "response": []
@@ -738,20 +614,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users/profile",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "profile"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "profile"]
             },
             "description": "Update the authenticated user's profile.\n\n**Content-Type**: `multipart/form-data`\n\n| Field  | Type   | Required | Notes |\n|--------|--------|----------|-------|\n| name   | string | No       | 2–100 chars |\n| phone  | string | No       | max 20 chars |\n| avatar | file   | No       | JPEG/PNG/WebP/GIF/AVIF, max 5 MB. Compressed to WebP + uploaded to S3. Old avatar auto-deleted. |\n\nAt least one field must be present."
           },
           "response": []
         },
-
         {
           "name": "Synchronize Profile (Internal Sync)",
           "request": {
@@ -774,14 +643,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users/sync",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "sync"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "sync"]
             }
           },
           "response": []
@@ -804,14 +667,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/users/addresses",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "addresses"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "addresses"]
             }
           },
           "response": []
@@ -838,14 +695,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users/addresses",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "addresses"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "addresses"]
             }
           },
           "response": [],
@@ -887,15 +738,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users/addresses/{{addressId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "addresses",
-                "{{addressId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "addresses", "{{addressId}}"]
             }
           },
           "response": []
@@ -913,15 +757,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/users/addresses/{{addressId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "addresses",
-                "{{addressId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "addresses", "{{addressId}}"]
             }
           },
           "response": []
@@ -953,13 +790,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users"]
             }
           },
           "response": []
@@ -981,14 +813,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/users/reindex",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "reindex"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "reindex"]
             }
           },
           "response": []
@@ -1006,13 +832,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/users?page=1&limit=10&search=admin&role=ADMIN&status=ACTIVE&sortBy=createdAt&sortOrder=desc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users"],
               "query": [
                 {
                   "key": "page",
@@ -1065,14 +886,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "{{userId}}"]
             }
           },
           "response": []
@@ -1099,14 +914,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/v1/auth/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "users"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "users"]
             }
           },
           "response": []
@@ -1124,14 +933,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/auth/users?page=1&limit=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "users"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "users"],
               "query": [
                 {
                   "key": "page",
@@ -1159,15 +962,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/v1/auth/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "v1",
-                "auth",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "users", "{{userId}}"]
             }
           },
           "response": []
@@ -1187,37 +983,35 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands?page=1&limit=10&search=",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "brands"],
                   "query": [
-                    { "key": "page", "value": "1" },
-                    { "key": "limit", "value": "10" },
-                    { "key": "search", "value": "" }
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    }
                   ]
                 }
               },
               "response": []
             },
             {
-              "name": "Get Brand by ID",
+              "name": "Get Brand by Slug",
               "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/v1/brands/{{brandId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands",
-                    "{{brandId}}"
-                  ]
+                  "raw": "{{baseUrl}}/v1/brands/{{brandSlug}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "brands", "{{brandSlug}}"]
                 }
               },
               "response": []
@@ -1276,13 +1070,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "brands"]
                 }
               },
               "response": [],
@@ -1360,14 +1149,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands/{{brandId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands",
-                    "{{brandId}}"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "brands", "{{brandId}}"]
                 },
                 "description": "Update a brand's metadata and/or logo in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field       | Type   | Required | Notes |\n|-------------|--------|----------|-------|\n| name        | string | No       | Brand name |\n| description | string | No       | Brand description |\n| website     | string | No       | Brand website URL |\n| seoTitle    | string | No       | SEO page title |\n| seoDesc     | string | No       | SEO meta description |\n| logo        | file   | No       | JPEG/PNG/WebP, max 5 MB. Compressed to WebP + uploaded to S3. Old logo auto-deleted. |\n\nAt least one field must be present."
               },
@@ -1386,14 +1169,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/brands/{{brandId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "brands",
-                    "{{brandId}}"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "brands", "{{brandId}}"]
                 }
               },
               "response": []
@@ -1410,32 +1187,21 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "categories"]
                 }
               },
               "response": []
             },
             {
-              "name": "Get Category by ID",
+              "name": "Get Category by Slug",
               "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/v1/categories/{{categoryId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories",
-                    "{{categoryId}}"
-                  ]
+                  "raw": "{{baseUrl}}/v1/categories/{{categorySlug}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "categories", "{{categorySlug}}"]
                 }
               },
               "response": []
@@ -1477,13 +1243,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "categories"]
                 }
               },
               "response": [],
@@ -1540,14 +1301,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories/{{categoryId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories",
-                    "{{categoryId}}"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "categories", "{{categoryId}}"]
                 },
                 "description": "Update a category's metadata and/or icon in a single request.\n\n**Content-Type**: `multipart/form-data`\n\n| Field    | Type   | Required | Notes |\n|----------|--------|----------|-------|\n| name     | string | No       | Category name |\n| parentId | string | No       | Parent category ID. Pass empty string to make root-level. |\n| icon     | file   | No       | JPEG/PNG/WebP, max 5 MB. Compressed to WebP + uploaded to S3. Old icon auto-deleted. |\n\nAt least one field must be present."
               },
@@ -1566,14 +1321,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/categories/{{categoryId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "categories",
-                    "{{categoryId}}"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "categories", "{{categoryId}}"]
                 }
               },
               "response": []
@@ -1590,25 +1339,57 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/products?page=1&limit=20&sortBy=createdAt&search=&status=&brandId=&categoryId=&priceMin=&priceMax=",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products"],
                   "query": [
-                    { "key": "page", "value": "1" },
-                    { "key": "limit", "value": "20" },
-                    { "key": "sortBy", "value": "createdAt" },
-                    { "key": "search", "value": "" },
-                    { "key": "status", "value": "" },
-                    { "key": "brandId", "value": "" },
-                    { "key": "categoryId", "value": "" },
-                    { "key": "priceMin", "value": "" },
-                    { "key": "priceMax", "value": "" }
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Items per page (default 20)"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt",
+                      "description": "Sort strategy: createdAt, price_asc, price_desc, name"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Sub-string matching on product name/description"
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "description": "Filter by product status: ACTIVE, PENDING, DRAFT, ARCHIVED"
+                    },
+                    {
+                      "key": "brandId",
+                      "value": "",
+                      "description": "Filter by Brand UUID"
+                    },
+                    {
+                      "key": "categoryId",
+                      "value": "",
+                      "description": "Filter by Category UUID"
+                    },
+                    {
+                      "key": "priceMin",
+                      "value": "",
+                      "description": "Minimum unit price limit"
+                    },
+                    {
+                      "key": "priceMax",
+                      "value": "",
+                      "description": "Maximum unit price limit"
+                    }
                   ]
-                }
+                },
+                "description": "Retrieve a paginated list of products. Supports search, category/brand filters, price ranges, and sorting. Publicly accessible.\n\n### Query Parameters:\n- `page`: Page number (default 1).\n- `limit`: Items per page (default 20).\n- `sortBy`: Field to sort by (`createdAt`, `price_asc`, `price_desc`, `name`).\n- `search`: Search text for name or description.\n- `status`: Filter by status (`ACTIVE`, `PENDING`, `DRAFT`, `ARCHIVED`).\n- `brandId`: Filter by brand UUID.\n- `categoryId`: Filter by category UUID.\n- `priceMin` / `priceMax`: Price range bounds."
               },
               "response": []
             },
@@ -1619,39 +1400,94 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/internal/search?search=Samsung&page=1&limit=10",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "internal",
-                    "search"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "internal", "search"],
                   "query": [
-                    { "key": "search", "value": "Samsung" },
-                    { "key": "page", "value": "1" },
-                    { "key": "limit", "value": "10" }
+                    {
+                      "key": "search",
+                      "value": "Samsung"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
                   ]
                 }
               },
               "response": []
             },
             {
-              "name": "Get Product by ID",
+              "name": "Get Products by Brand Slug",
               "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/v1/products/{{productId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "{{productId}}"
+                  "raw": "{{baseUrl}}/v1/products/brand/{{brandSlug}}?page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "brand", "{{brandSlug}}"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
                   ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Products by Category Slug",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/category/{{categorySlug}}?page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "category", "{{categorySlug}}"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Related Products by Slug",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/{{productSlug}}/related",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productSlug}}", "related"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Product by Slug",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/{{productSlug}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productSlug}}"]
                 }
               },
               "response": []
@@ -1669,7 +1505,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Samsung Galaxy S24 Ultra\",\n  \"description\": \"Flagship smartphone with AI features and titanium frame\",\n  \"price\": 1299.99,\n  \"brandId\": \"{{brandId}}\",\n  \"categoryIds\": [\"{{categoryId}}\"],\n  \"metadata\": {\n    \"color\": \"Titanium Black\",\n    \"storage\": \"256GB\",\n    \"ram\": \"12GB\"\n  }\n}",
+                  "raw": "{\n  \"name\": \"Samsung Galaxy S24 Ultra\",\n  \"description\": \"Flagship smartphone with AI features and titanium frame\",\n  \"specifications\": {\n    \"display\": \"6.8-inch Dynamic AMOLED 2X, 120Hz\",\n    \"processor\": \"Snapdragon 8 Gen 3\",\n    \"battery\": \"5000mAh\",\n    \"camera\": \"200MP Wide + 12MP Ultra Wide + 50MP Periscope Telephoto\"\n  },\n  \"brandId\": \"{{brandId}}\",\n  \"categoryIds\": [\n    \"{{categoryId}}\"\n  ],\n  \"metadata\": {\n    \"seoTitle\": \"Samsung Galaxy S24 Ultra - Buy Online\"\n  },\n  \"colors\": [\n    {\n      \"tempKey\": \"black\",\n      \"name\": \"Titanium Black\",\n      \"hexCode\": \"#3B3B3B\",\n      \"sortOrder\": 0\n    },\n    {\n      \"tempKey\": \"gray\",\n      \"name\": \"Titanium Gray\",\n      \"hexCode\": \"#8A8D8F\",\n      \"sortOrder\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"colorTempKey\": \"black\",\n      \"sku\": \"SAMSUNG-S24-ULTRA-BLK-256GB\",\n      \"price\": 1299.99,\n      \"compareAtPrice\": 1399.99,\n      \"attributes\": {\n        \"storage\": \"256GB\",\n        \"ram\": \"12GB\"\n      },\n      \"isDefault\": true\n    },\n    {\n      \"colorTempKey\": \"black\",\n      \"sku\": \"SAMSUNG-S24-ULTRA-BLK-512GB\",\n      \"price\": 1499.99,\n      \"attributes\": {\n        \"storage\": \"512GB\",\n        \"ram\": \"12GB\"\n      }\n    },\n    {\n      \"colorTempKey\": \"gray\",\n      \"sku\": \"SAMSUNG-S24-ULTRA-GRY-256GB\",\n      \"price\": 1299.99,\n      \"attributes\": {\n        \"storage\": \"256GB\",\n        \"ram\": \"12GB\"\n      }\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1678,14 +1514,10 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/products",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products"
-                  ]
-                }
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products"]
+                },
+                "description": "Create a new product. Requires `ADMIN` or `MANAGER` role.\n\nPricing is variant-wise — `Product` itself has no `sku`/`price`. Every product needs at least one color and at least one variant.\n\n### Fields:\n- `name`: Product name (required, 2-200 chars).\n- `description`: Detailed description (optional, max 5000 chars).\n- `specifications`: Shared spec sheet across all variants — display, processor, battery, camera, etc. (optional object).\n- `brandId`: Associated Brand ID (required, UUID).\n- `categoryIds`: Array of associated Category IDs (optional, UUIDs).\n- `metadata`: Custom key-value pairs / SEO fields (optional).\n- `colors`: Array of colors (required, min 1). Each has `name` (required), `hexCode` (optional swatch color), `sortOrder` (optional), and `tempKey` — a client-chosen key so `variants[].colorTempKey` can reference a color created in the same request (since it has no id yet).\n- `variants`: Array of sellable variants (required, min 1). Each has `sku` (optional, auto-generated if omitted), `price` (required), `compareAtPrice` (optional MRP for strikethrough pricing), `attributes` (required object, e.g. storage/RAM — color is NOT part of attributes anymore), `colorTempKey` (references a color from this request) or `colorId` (references an existing color, used on update), `isDefault` (optional, exactly one variant must end up default — the first is auto-promoted if none is marked), `isActive` (optional, default true)."
               },
               "response": [],
               "event": [
@@ -1697,6 +1529,12 @@
                       "const data = response.data || response;",
                       "if (data.id) {",
                       "    pm.collectionVariables.set(\"productId\", data.id);",
+                      "}",
+                      "if (data.colors && data.colors.length > 0) {",
+                      "    pm.collectionVariables.set(\"colorId\", data.colors[0].id);",
+                      "}",
+                      "if (data.variants && data.variants.length > 0) {",
+                      "    pm.collectionVariables.set(\"variantId\", data.variants[0].id);",
                       "}"
                     ],
                     "type": "text/javascript"
@@ -1717,7 +1555,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"products\": [\n    {\n      \"name\": \"Samsung Galaxy S24 Ultra\",\n      \"description\": \"Flagship smartphone with AI features\",\n      \"price\": 1299.99,\n      \"brandId\": \"{{brandId}}\",\n      \"categoryIds\": [\"{{categoryId}}\"],\n      \"metadata\": {\n        \"color\": \"Titanium Black\",\n        \"storage\": \"256GB\"\n      }\n    },\n    {\n      \"name\": \"Samsung Galaxy S24 Plus\",\n      \"description\": \"Samsung phone with standard specs\",\n      \"price\": 999.99,\n      \"brandId\": \"{{brandId}}\",\n      \"categoryIds\": [\"{{categoryId}}\"],\n      \"metadata\": {\n        \"color\": \"Titanium Gray\",\n        \"storage\": \"256GB\"\n      }\n    }\n  ]\n}",
+                  "raw": "{\n  \"products\": [\n    {\n      \"name\": \"Samsung Galaxy S24 Ultra\",\n      \"description\": \"Flagship smartphone with AI features\",\n      \"brandId\": \"{{brandId}}\",\n      \"categoryIds\": [\n        \"{{categoryId}}\"\n      ],\n      \"colors\": [\n        {\n          \"tempKey\": \"black\",\n          \"name\": \"Titanium Black\",\n          \"hexCode\": \"#3B3B3B\"\n        }\n      ],\n      \"variants\": [\n        {\n          \"colorTempKey\": \"black\",\n          \"sku\": \"SAMSUNG-S24-ULTRA-BLK-256GB\",\n          \"price\": 1299.99,\n          \"attributes\": {\n            \"storage\": \"256GB\",\n            \"ram\": \"12GB\"\n          },\n          \"isDefault\": true\n        }\n      ]\n    },\n    {\n      \"name\": \"Samsung Galaxy S24 Plus\",\n      \"description\": \"Samsung phone with standard specs\",\n      \"brandId\": \"{{brandId}}\",\n      \"categoryIds\": [\n        \"{{categoryId}}\"\n      ],\n      \"colors\": [\n        {\n          \"tempKey\": \"gray\",\n          \"name\": \"Titanium Gray\",\n          \"hexCode\": \"#8A8D8F\"\n        }\n      ],\n      \"variants\": [\n        {\n          \"colorTempKey\": \"gray\",\n          \"sku\": \"SAMSUNG-S24-PLUS-GRY-256GB\",\n          \"price\": 999.99,\n          \"attributes\": {\n            \"storage\": \"256GB\",\n            \"ram\": \"8GB\"\n          },\n          \"isDefault\": true\n        }\n      ]\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1726,15 +1564,10 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/bulk",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "bulk"
-                  ]
-                }
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "bulk"]
+                },
+                "description": "Create multiple products in a single transaction. Same per-product shape as `Create Product` (each entry needs `colors` and `variants`)."
               },
               "response": []
             },
@@ -1751,7 +1584,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"price\": 1249.99\n}",
+                  "raw": "{\n  \"description\": \"Updated description with 2025 firmware support.\",\n  \"variants\": [\n    {\n      \"id\": \"{{variantId}}\",\n      \"colorId\": \"{{colorId}}\",\n      \"sku\": \"SAMSUNG-S24-ULTRA-BLK-256GB-V2\",\n      \"price\": 1249.99,\n      \"compareAtPrice\": 1399.99,\n      \"attributes\": {\n        \"storage\": \"256GB\",\n        \"ram\": \"12GB\"\n      },\n      \"isDefault\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1760,15 +1593,10 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/{{productId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "{{productId}}"
-                  ]
-                }
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productId}}"]
+                },
+                "description": "Update an existing product, its colors, and its variants. `colors`/`variants` are full-replacement syncs when supplied — any existing color/variant not included (by omitting its `id`) is deleted, so re-send every color/variant you want to keep alongside any changes. A product must always end up with at least one color and one variant. New variants during an update reference their color via `colorId` (existing) or `colorTempKey` (a color being created in the same request)."
               },
               "response": []
             },
@@ -1794,15 +1622,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/{{productId}}/status",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "{{productId}}",
-                    "status"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productId}}", "status"]
                 }
               },
               "response": []
@@ -1820,15 +1641,114 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/{{productId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Color",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Titanium Violet\",\n  \"hexCode\": \"#6B5B95\",\n  \"sortOrder\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/{{productId}}/colors",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productId}}", "colors"]
+                },
+                "description": "Add a new color to an existing product. Requires `ADMIN` or `MANAGER` role.\n\n### Fields:\n- `name`: Color name, unique per product (required).\n- `hexCode`: Hex swatch color, e.g. `#6B5B95` (optional).\n- `sortOrder`: Display order among the product's colors (optional).\n- `imageIds`: Pre-uploaded `ProductImage` IDs to attach to this color's gallery (optional)."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();",
+                      "const data = response.data || response;",
+                      "if (data.id) {",
+                      "    pm.collectionVariables.set(\"colorId\", data.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Color",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Titanium Violet\",\n  \"hexCode\": \"#5A4A80\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/{{productId}}/colors/{{colorId}}",
+                  "host": ["{{baseUrl}}"],
                   "path": [
                     "v1",
                     "products",
-                    "{{productId}}"
+                    "{{productId}}",
+                    "colors",
+                    "{{colorId}}"
                   ]
-                }
+                },
+                "description": "Update a color's name, hex swatch, sort order, or gallery image set. Requires `ADMIN` or `MANAGER` role."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Color",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/products/{{productId}}/colors/{{colorId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": [
+                    "v1",
+                    "products",
+                    "{{productId}}",
+                    "colors",
+                    "{{colorId}}"
+                  ]
+                },
+                "description": "Delete a color from a product, along with its images and variants (cascade). Requires `ADMIN` or `MANAGER` role. Blocked if this is the product's only remaining color, or if it holds the product's only remaining variants."
               },
               "response": []
             },
@@ -1855,17 +1775,19 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/v1/products/{{productId}}/images",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "products",
-                    "{{productId}}",
-                    "images"
+                  "raw": "{{baseUrl}}/v1/products/{{productId}}/images?colorId={{colorId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "products", "{{productId}}", "images"],
+                  "query": [
+                    {
+                      "key": "colorId",
+                      "value": "{{colorId}}",
+                      "description": "Optional Color ID to associate the uploaded images with a specific color's gallery. Omit for generic/lifestyle images not tied to a color.",
+                      "disabled": true
+                    }
                   ]
-                }
+                },
+                "description": "Upload one or more images for a product. Can optionally associate the images with a specific product color's gallery by providing a `colorId` query parameter — selecting that color on the PDP swaps to this gallery. Omit `colorId` for generic/lifestyle images. Requires `ADMIN` or `MANAGER` role."
               },
               "response": []
             },
@@ -1882,9 +1804,7 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/{{productId}}/images/{{imageId}}/primary",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
+                  "host": ["{{baseUrl}}"],
                   "path": [
                     "v1",
                     "products",
@@ -1910,9 +1830,7 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/products/{{productId}}/images/{{imageId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
+                  "host": ["{{baseUrl}}"],
                   "path": [
                     "v1",
                     "products",
@@ -1936,18 +1854,25 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews?productId={{productId}}&page=1&limit=10&status=",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews"],
                   "query": [
-                    { "key": "productId", "value": "{{productId}}" },
-                    { "key": "page", "value": "1" },
-                    { "key": "limit", "value": "10" },
-                    { "key": "status", "value": "" }
+                    {
+                      "key": "productId",
+                      "value": "{{productId}}"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "status",
+                      "value": ""
+                    }
                   ]
                 }
               },
@@ -1960,14 +1885,8 @@
                 "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews/{{reviewId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews",
-                    "{{reviewId}}"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews", "{{reviewId}}"]
                 }
               },
               "response": []
@@ -1994,13 +1913,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews"]
                 }
               },
               "response": [],
@@ -2033,15 +1947,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews/{{reviewId}}/vote",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews",
-                    "{{reviewId}}",
-                    "vote"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews", "{{reviewId}}", "vote"]
                 }
               },
               "response": []
@@ -2059,15 +1966,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews/{{reviewId}}/vote",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews",
-                    "{{reviewId}}",
-                    "vote"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews", "{{reviewId}}", "vote"]
                 }
               },
               "response": []
@@ -2094,20 +1994,516 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/v1/reviews/{{reviewId}}/moderate",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "v1",
-                    "reviews",
-                    "{{reviewId}}",
-                    "moderate"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "reviews", "{{reviewId}}", "moderate"]
                 }
               },
               "response": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "6. Search Service",
+      "item": [
+        {
+          "name": "Search Products (Elastic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/search?query=Samsung&brands={{brandId}}&categories={{categoryId}}&priceMin=100&priceMax=2000&rating=4&inStock=true&sortBy=relevance&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Samsung",
+                  "description": "Fuzzy matching text query for product name, description, SKU, or tags"
+                },
+                {
+                  "key": "brands",
+                  "value": "{{brandId}}",
+                  "description": "Comma-separated list of brand IDs to filter results"
+                },
+                {
+                  "key": "categories",
+                  "value": "{{categoryId}}",
+                  "description": "Comma-separated list of category IDs to filter results"
+                },
+                {
+                  "key": "priceMin",
+                  "value": "100",
+                  "description": "Minimum unit price limit"
+                },
+                {
+                  "key": "priceMax",
+                  "value": "2000",
+                  "description": "Maximum unit price limit"
+                },
+                {
+                  "key": "rating",
+                  "value": "4",
+                  "description": "Minimum average review rating filter (1-5)"
+                },
+                {
+                  "key": "inStock",
+                  "value": "true",
+                  "description": "Filter only items in stock (true/false)"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "relevance",
+                  "description": "Sorting options: relevance, price_asc, price_desc, newest, rating"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Pagination page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Pagination limit count"
+                }
+              ]
+            },
+            "description": "Full-text product search with facet aggregations using Elasticsearch. Does not require authorization.\n\n### Query Parameters:\n- `query`: Text search term.\n- `brands`: Comma-separated brand IDs.\n- `categories`: Comma-separated category IDs.\n- `priceMin` / `priceMax`: Price range bounds.\n- `rating`: Min rating (1 to 5).\n- `inStock`: Only return items in stock (`true` or `false`).\n- `sortBy`: Sorting field (`relevance`, `price_asc`, `price_desc`, `newest`, `rating`).\n- `page` / `limit`: Pagination parameters."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Autocomplete",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/search/autocomplete?q=Sam&limit=8",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "search", "autocomplete"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Sam",
+                  "description": "Prefix query input text for search suggestions"
+                },
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "description": "Maximum number of autocomplete suggestions to return (default 8)"
+                }
+              ]
+            },
+            "description": "Returns up to 8 product name suggestions for prefix queries. Used for real-time search autocomplete boxes."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Inventory Service",
+      "item": [
+        {
+          "name": "Get Variant Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/variant/{{variantId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "variant", "{{variantId}}"]
+            },
+            "description": "Retrieve the current stock level, reserved quantity, and SKU for a single variant. Publicly accessible."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/product/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "product", "{{productId}}"]
+            },
+            "description": "Retrieve stock levels for every variant of a product (array, one entry per stocked variant). Publicly accessible."
+          },
+          "response": []
+        },
+        {
+          "name": "Reserve Stock",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"variantId\": \"{{variantId}}\",\n  \"quantity\": 2,\n  \"referenceId\": \"ord_882cb1ab-a5a4-441f-8239-44d5a9ea8bc9\",\n  \"referenceType\": \"ORDER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/reserve",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "reserve"]
+            },
+            "description": "Reserve a specified quantity of inventory for an order or a checkout session. Typically called service-to-service by order or cart services.\n\n### Fields:\n- `productId`: ID of the product.\n- `variantId`: ID of the variant (required — every sellable unit is a variant).\n- `quantity`: Quantity to reserve (integer > 0).\n- `referenceId`: UUID representing the booking resource (e.g. order ID).\n- `referenceType`: Context of the reservation (e.g. `ORDER`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Reservation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceId\": \"ord_882cb1ab-a5a4-441f-8239-44d5a9ea8bc9\",\n  \"referenceType\": \"ORDER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "confirm"]
+            },
+            "description": "Confirm a previously held inventory reservation when checkout/payment is completed. Decreases stock permanently and frees the reservation hold."
+          },
+          "response": []
+        },
+        {
+          "name": "Release Reservation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceId\": \"ord_882cb1ab-a5a4-441f-8239-44d5a9ea8bc9\",\n  \"referenceType\": \"ORDER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/release",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "release"]
+            },
+            "description": "Release a previously held inventory reservation when checkout fails, is cancelled, or times out. Restores the reserved quantity back to available stock."
+          },
+          "response": []
+        },
+        {
+          "name": "Restock Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"variantId\": \"{{variantId}}\",\n  \"quantity\": 50,\n  \"sku\": \"SAMSUNG-S24-ULTRA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/restock",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "restock"]
+            },
+            "description": "Restock inventory count for a variant. Requires `ADMIN` or `MANAGER` authentication.\n\n### Fields:\n- `productId`: ID of the product.\n- `variantId`: ID of the variant (required).\n- `quantity`: Quantity to add to stock (integer >= 0).\n- `sku`: Required the first time inventory is initialised for this variant; ignored afterwards."
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Update Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"variantId\": \"{{variantId}}\",\n      \"quantity\": 100,\n      \"sku\": \"SAMSUNG-S24-ULTRA\",\n      \"threshold\": 10\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/inventory/bulk-update",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "inventory", "bulk-update"]
+            },
+            "description": "Perform bulk inventory update including setting low stock alert thresholds. Requires `ADMIN` or `MANAGER` role.\n\n### Fields:\n- `productId`: Product unique ID.\n- `variantId`: Variant ID (required).\n- `quantity`: Current physical count.\n- `sku`: Stock Keeping Unit string identifier.\n- `threshold`: Optional warning threshold for low stock alert notifications."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Offer Service",
+      "item": [
+        {
+          "name": "List Offers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers?page=1&limit=10&status=ACTIVE&type=FLASH_SALE",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (integer > 0)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (integer > 0)"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter by status: ACTIVE, DISABLED, EXPIRED"
+                },
+                {
+                  "key": "type",
+                  "value": "FLASH_SALE",
+                  "description": "Filter by discount type: PERCENTAGE, FIXED_AMOUNT, FLASH_SALE, BOGO, TIERED, FREE_SHIPPING"
+                }
+              ]
+            },
+            "description": "Retrieve paginated list of offers. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Offer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}"]
+            },
+            "description": "Retrieve detailed information of a single offer by its ID. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Flash Sale 2026\",\n  \"type\": \"FLASH_SALE\",\n  \"value\": 15.0,\n  \"maxDiscount\": 100.0,\n  \"startAt\": \"2026-07-01T00:00:00.000Z\",\n  \"endAt\": \"2026-07-07T23:59:59.000Z\",\n  \"usageLimit\": 1000,\n  \"perUserLimit\": 1,\n  \"minOrderAmount\": 50.0,\n  \"applicability\": \"VARIANT\",\n  \"applicableIds\": [\"{{variantId}}\"],\n  \"flashSaleStock\": {\n    \"totalStock\": 100\n  },\n  \"couponCodes\": [\n    {\n      \"code\": \"SUMMERFLASH15\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers"]
+            },
+            "description": "Create a new promotional campaign or discount. Requires `ADMIN` or `MANAGER` role.\n\n### Fields:\n- `name`: Campaign name.\n- `type`: Offer type (`PERCENTAGE`, `FIXED_AMOUNT`, `FLASH_SALE`, `BOGO`, `TIERED`, `FREE_SHIPPING`).\n- `value`: Numerical value of discount (e.g. percentage or fixed value).\n- `maxDiscount`: Max ceiling cap for percentage discount (optional).\n- `startAt` / `endAt`: Valid UTC ISO dates.\n- `usageLimit` / `perUserLimit`: Limit counters.\n- `minOrderAmount`: Order basket minimum to trigger discount.\n- `applicability`: Target scope (`STORE`, `BRAND`, `CATEGORY`, `PRODUCT`, `VARIANT`).\n- `applicableIds`: ID list of category/product/brand/variant records.\n- `flashSaleStock`: Object with `totalStock` (mandatory for `FLASH_SALE` type).\n- `couponCodes`: Associated unique code objects (optional)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "const data = response.data || response;",
+                  "if (data.id) {",
+                  "    pm.collectionVariables.set(\"offerId\", data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Offer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Summer Flash Sale 2026\",\n  \"value\": 20.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}"]
+            },
+            "description": "Update an existing offer. Supports partial patches. Requires `ADMIN` or `MANAGER` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Disable Offer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}"]
+            },
+            "description": "Disable/Deactivate an offer (soft delete/disable status). Requires `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Best Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"variantId\": \"{{variantId}}\",\n      \"brandId\": \"{{brandId}}\",\n      \"categoryIds\": [\"{{categoryId}}\"],\n      \"quantity\": 2,\n      \"unitPrice\": 1299.99\n    }\n  ],\n  \"subtotal\": 2599.98\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/calculate",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "calculate"]
+            },
+            "description": "Evaluate basket items and subtotal to return the best applicable promotion/coupon. Protected by `JwtAuthGuard` to prevent public DoS on this DB-heavy endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Reserve Flash Sale Stock",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}/flash-sale/reserve",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}", "flash-sale", "reserve"]
+            },
+            "description": "Reserve stock for a flash sale offer. Decrements flash sale inventory pool temporarily."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Flash Sale Stock",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}/flash-sale/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}", "flash-sale", "confirm"]
+            },
+            "description": "Confirm flash sale stock purchase. Finalizes stock reduction."
+          },
+          "response": []
+        },
+        {
+          "name": "Release Flash Sale Stock",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/offers/{{offerId}}/flash-sale/release",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "offers", "{{offerId}}", "flash-sale", "release"]
+            },
+            "description": "Release reserved flash sale stock reservation (restores pool stock)."
+          },
+          "response": []
         }
       ]
     }
@@ -2175,6 +2571,21 @@
     },
     {
       "key": "imageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "offerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "colorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "variantId",
       "value": "",
       "type": "string"
     }

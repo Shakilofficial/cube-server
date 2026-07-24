@@ -1,17 +1,17 @@
+import { paginationHelper } from "@cube/common";
+import { StorageService } from "@cube/storage";
 import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
   BadRequestException,
+  ConflictException,
+  Injectable,
   Logger,
+  NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../../core/prisma/prisma.service";
+import { ProductHelper } from "../product/helpers/product.helper";
 import { CreateBrandDto } from "./dto/create-brand.dto";
 import { UpdateBrandDto } from "./dto/update-brand.dto";
-import { paginationHelper } from "@cube/common";
 import { generateSlug } from "./utils/brand.utils";
-import { StorageService } from "@cube/storage";
-import { ProductHelper } from "../product/helpers/product.helper";
 
 @Injectable()
 export class BrandService {
@@ -79,6 +79,15 @@ export class BrandService {
     ]);
 
     return { meta: { page, limit, total }, data };
+  }
+
+  async findOneBySlug(slug: string) {
+    const brand = await this.prisma.brand.findUnique({
+      where: { slug },
+      include: { _count: { select: { products: true } } },
+    });
+    if (!brand) throw new NotFoundException(`Brand with slug "${slug}" not found.`);
+    return brand;
   }
 
   async findOne(id: string) {

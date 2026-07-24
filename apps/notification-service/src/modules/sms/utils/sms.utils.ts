@@ -21,3 +21,22 @@ export const BULK_SMS_RESPONSES: Record<number, string> = {
   1031: "Your Account Not Verified, Please Contact Administrator.",
   1032: "IP Not whitelisted",
 };
+
+/** Organized professional SMS templates. */
+export const SMS_TEMPLATES = {
+  /** One-Time Password / OTP verification template. */
+  otp: (otp: string, company: string = "Cube"): string => 
+    `[${company}] Your verification code is: ${otp}. Valid for 10 minutes. Do not share this code.`,
+
+  /** Welcome template after successful account creation. */
+  welcome: (name: string, company: string = "Cube"): string => 
+    `Welcome to ${company}, ${name}! Your account has been successfully created and verified. Start exploring now.`,
+
+  /** Password reset notification template. */
+  passwordReset: (company: string = "Cube"): string => 
+    `[${company}] Your account password was recently changed. If this wasn't you, please contact support immediately.`,
+
+  /** Invoice / Payment notification template. */
+  invoicePaid: (amount: string, invoiceNo: string, company: string = "Cube"): string => 
+    `[${company}] Payment of ${amount} for Invoice #${invoiceNo} has been received. Thank you!`,
+};

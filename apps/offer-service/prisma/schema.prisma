@@ -49,6 +49,7 @@ enum ApplicabilityScope {
   BRAND
   CATEGORY
   PRODUCT
+  VARIANT
 }
 
 model FlashSaleStock {

@@ -6,17 +6,21 @@ import { PRODUCT_INDEX_NAME } from "./utils/indexing.constants";
 /** Shape of a product document stored in Elasticsearch (from spec 2.3) */
 export interface ProductDocument {
   id: string;
-  sku: string;
   name: string;
   description: string;
   brandName: string;
   categoryNames: string[];
-  price: number;
+  colorNames: string[];
+  coverImageUrl: string | null;
   status: string;
   avgRating: number;
   reviewCount: number;
   inStock: boolean;
   createdAt: string;
+  variantSkus?: string[];
+  variantAttributes?: string[];
+  minPrice: number;
+  maxPrice: number;
 }
 
 @Injectable()
@@ -52,7 +56,6 @@ export class ProductIndexService implements OnModuleInit {
         mappings: {
           properties: {
             id: { type: "keyword" },
-            sku: { type: "keyword" },
             name: { type: "text", analyzer: "standard" },
             description: { type: "text", analyzer: "standard" },
             brandName: {
@@ -63,12 +66,20 @@ export class ProductIndexService implements OnModuleInit {
               type: "text",
               fields: { keyword: { type: "keyword" } },
             },
-            price: { type: "float" },
+            colorNames: {
+              type: "text",
+              fields: { keyword: { type: "keyword" } },
+            },
+            coverImageUrl: { type: "keyword" },
             status: { type: "keyword" },
             avgRating: { type: "float" },
             reviewCount: { type: "integer" },
             inStock: { type: "boolean" },
             createdAt: { type: "date" },
+            variantSkus: { type: "keyword" },
+            variantAttributes: { type: "text", analyzer: "standard" },
+            minPrice: { type: "float" },
+            maxPrice: { type: "float" },
           },
         },
       });
@@ -94,7 +105,7 @@ export class ProductIndexService implements OnModuleInit {
         id: doc.id,
         document: doc,
       });
-      this.logger.log(`Indexed product: ${doc.id} (${doc.sku})`);
+      this.logger.log(`Indexed product: ${doc.id} (${doc.name})`);
     } catch (err: any) {
       this.logger.error(`Failed to index product ${doc.id}: ${err.message}`);
     }
