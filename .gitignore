@@ -14,12 +14,6 @@ out/
 **/prisma/generated/
 
 # ─── Environment Variables ───────────────────────────────────────────────────
-.env
-.env.local
-.env.development
-.env.staging
-.env.production
-.env.test
 # Keep example files
 !.env.example
 
@@ -39,7 +33,6 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 *.swp
 *.swo
 *.suo
@@ -57,3 +50,4 @@ coverage/
 .cache/
 tmp/
 temp/
+config.bat
