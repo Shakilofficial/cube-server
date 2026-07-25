@@ -66,11 +66,11 @@ CUBE utilizes a decentralized database-per-service pattern to ensure strict serv
 | **Notification Service** | `3003` | HTTP / RabbitMQ | None (SMTP / SMS APIs) | 🟢 Implemented |
 | **Product Service** | `3004` | HTTP / RabbitMQ | PostgreSQL (`product_db`) + MinIO | 🟢 Implemented |
 | **Search Service** | `3005` | HTTP / RabbitMQ | Elasticsearch | 🟢 Implemented |
-| **Cart Service** | `3006` | HTTP / Redis | Redis + MongoDB (`cart_db`) | 🟡 Roadmap |
-| **Order Service** | `3007` | HTTP / RabbitMQ | PostgreSQL (`order_db`) | 🟡 Roadmap |
-| **Offer Service** | `3008` | HTTP | PostgreSQL / Redis | 🟡 Roadmap |
-| **Payment Service** | `3009` | HTTP | PostgreSQL | 🟡 Roadmap |
-| **Inventory Service** | `3010` | HTTP / RabbitMQ | PostgreSQL (`inventory_db`) | 🟡 Roadmap |
+| **Inventory Service** | `3006` | HTTP / RabbitMQ | PostgreSQL (`inventory_db`) + Redis | 🟢 Implemented |
+| **Offer Service** | `3007` | HTTP / RabbitMQ | PostgreSQL (`offer_db`) | 🟢 Implemented |
+| **Cart Service** | `3008` | HTTP / Redis | Redis + MongoDB (`cart_db`) | 🟡 Roadmap |
+| **Order Service** | `3009` | HTTP / RabbitMQ | PostgreSQL (`order_db`) | 🟡 Roadmap |
+| **Payment Service** | `3010` | HTTP | PostgreSQL | 🟡 Roadmap |
 | **Shipping Service** | `3011` | HTTP / RabbitMQ | PostgreSQL (`shipping_db`) | 🟡 Roadmap |
 | **Support Service** | `3012` | WebSockets / HTTP | PostgreSQL (`support_db`) + Redis | 🟡 Roadmap |
 | **Analytics Service** | `3013` | Kafka / HTTP | ClickHouse | 🟡 Roadmap |
