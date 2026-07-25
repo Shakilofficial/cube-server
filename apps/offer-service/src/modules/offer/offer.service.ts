@@ -163,6 +163,20 @@ export class OfferService {
       });
 
       if (flashSaleStock) {
+        const existingStock = await tx.flashSaleStock.findUnique({
+          where: { offerId: id },
+        });
+
+        if (
+          existingStock &&
+          flashSaleStock.totalStock <
+            existingStock.soldStock + existingStock.reserved
+        ) {
+          throw new BadRequestException(
+            `totalStock (${flashSaleStock.totalStock}) cannot be less than the ${existingStock.soldStock} units already sold plus ${existingStock.reserved} units reserved.`,
+          );
+        }
+
         await tx.flashSaleStock.upsert({
           where: { offerId: id },
           update: { totalStock: flashSaleStock.totalStock },

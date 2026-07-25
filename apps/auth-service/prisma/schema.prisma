@@ -23,9 +23,6 @@ model User {
   mfaConfig          MfaConfig?
   loginHistory       LoginHistory[]
   oauthAccounts      OauthAccount[]
-
-  @@index([email])
-  @@index([phone])
 }
 
 enum UserRole {
@@ -66,7 +63,6 @@ model RefreshToken {
   createdAt   DateTime  @default(now())
   user        User      @relation(fields: [userId], references: [id])
 
-  @@index([tokenHash])
   @@index([userId])
 }
 
@@ -92,6 +88,8 @@ model BackupCode {
   codeHash    String
   usedAt      DateTime?
   mfaConfig   MfaConfig @relation(fields: [mfaConfigId], references: [id])
+
+  @@index([mfaConfigId])
 }
 
 model LoginHistory {
@@ -114,6 +112,8 @@ model PasswordResetToken {
   expiresAt   DateTime
   usedAt      DateTime?
   user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model OauthAccount {
@@ -124,4 +124,5 @@ model OauthAccount {
   user         User    @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerId])
+  @@index([userId])
 }

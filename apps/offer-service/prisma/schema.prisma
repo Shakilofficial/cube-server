@@ -27,6 +27,8 @@ model Offer {
 
   flashSaleStock  FlashSaleStock?
   couponCodes     CouponCode[]
+
+  @@index([status, startAt, endAt])
 }
 
 enum OfferType {
@@ -69,5 +71,5 @@ model CouponCode {
   usageCount  Int       @default(0)
   offer       Offer     @relation(fields: [offerId], references: [id])
 
-  @@index([code])
+  @@index([offerId])
 }

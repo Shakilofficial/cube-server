@@ -28,7 +28,6 @@ model Product {
   brand          Brand             @relation(fields: [brandId], references: [id])
 
   @@index([status, brandId])
-  @@index([slug])
 }
 
 enum ProductStatus {
@@ -103,6 +102,8 @@ model Category {
   parent   Category?         @relation(name: "CategoryHierarchy", fields: [parentId], references: [id])
   children Category[]        @relation(name: "CategoryHierarchy")
   products ProductCategory[]
+
+  @@index([parentId])
 }
 
 model ProductCategory {
@@ -149,6 +150,7 @@ model ProductReview {
 
   @@unique([productId, userId]) // One review per user per product
   @@index([productId, status])
+  @@index([userId])
 }
 
 enum ReviewStatus {
@@ -163,4 +165,5 @@ model ReviewHelpfulVote {
   review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@id([userId, reviewId])
+  @@index([reviewId])
 }

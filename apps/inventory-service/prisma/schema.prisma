@@ -35,6 +35,7 @@ model Reservation {
   createdAt     DateTime          @default(now())
   inventory     Inventory         @relation(fields: [inventoryId], references: [id])
 
+  @@index([inventoryId])
   @@index([referenceId, status])
   @@index([expiresAt, status]) // For cleanup job
 }

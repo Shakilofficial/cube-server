@@ -307,6 +307,12 @@ export class InventoryService {
         });
 
         if (inv) {
+          if (item.quantity < inv.reserved) {
+            throw new BadRequestException(
+              `Quantity for variant "${item.variantId}" (${item.quantity}) cannot be less than the ${inv.reserved} units already reserved.`,
+            );
+          }
+
           const prevQty = inv.quantity;
           inv = await tx.inventory.update({
             where: { id: inv.id, version: inv.version },
